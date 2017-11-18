@@ -12,7 +12,7 @@
 #include "ui_pinyin_editor.h"
 
 
-static const int UPDATE_DELAY = 150; // 0.15s
+static const int UPDATE_DELAY = 500; // 0.5s
 
 
 class PinyinEditor : public QMainWindow
@@ -38,7 +38,7 @@ public slots:
 private:
     Ui::PinyinEditorClass ui;
 	QTimer updateTimer;
-	bool saved;
+	int saved;
 	QScopedPointer<QSaveFile> currentFile;
 
 protected:

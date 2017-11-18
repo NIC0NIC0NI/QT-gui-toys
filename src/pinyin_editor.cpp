@@ -1,3 +1,5 @@
+
+#include <QHBoxLayout>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFontDialog>
@@ -8,6 +10,8 @@
 #include "common.h"
 #include "pinyin_editor.h"
 
+#define LOG_TEXT(filename, text) {QFile f(filename, this);f.open(QIODevice::WriteOnly|QIODevice::Text);f.write(text.toUtf8());f.close();}
+
 PinyinEditor::PinyinEditor(QWidget *parent)
 	: QMainWindow(parent), updateTimer(this), saved(true), currentFile(nullptr) {
 	this->ui.setupUi(this);
@@ -15,36 +19,20 @@ PinyinEditor::PinyinEditor(QWidget *parent)
 	this->updateTimer.setInterval(UPDATE_DELAY);
 
 	connect(this->ui.actionQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-	connect(this->ui.actionExit, SIGNAL(triggered()), qApp, SLOT(quit()));
 	connect(this->ui.actionFont, SIGNAL(triggered()), this, SLOT(selectFont()));
 	connect(this->ui.actionColor, SIGNAL(triggered()), this, SLOT(selectColor()));
 	connect(this->ui.actionAbout, SIGNAL(triggered()), this, SLOT(about()));
-
 	connect(this->ui.actionNew, SIGNAL(triggered()), this, SLOT(newFile()));
 	connect(this->ui.actionOpen, SIGNAL(triggered()), this, SLOT(openFile()));
 	connect(this->ui.actionSave, SIGNAL(triggered()), this, SLOT(saveFile()));
 	connect(this->ui.actionSaveAs, SIGNAL(triggered()), this, SLOT(saveAsFile()));
 	connect(this->ui.actionSaveOutput, SIGNAL(triggered()), this, SLOT(saveOutput()));
-
-	connect(this->ui.actionUndo, SIGNAL(triggered()), this->ui.textEdit, SLOT(undo()));
-	connect(this->ui.actionRedo, SIGNAL(triggered()), this->ui.textEdit, SLOT(redo()));
-	connect(this->ui.actionCut, SIGNAL(triggered()), this->ui.textEdit, SLOT(cut()));
-	connect(this->ui.actionCopy, SIGNAL(triggered()), this->ui.textEdit, SLOT(copy()));
-	connect(this->ui.actionPaste, SIGNAL(triggered()), this->ui.textEdit, SLOT(paste()));
 	connect(this->ui.actionDelete, SIGNAL(triggered()), this, SLOT(deleteSelectedText()));
-	connect(this->ui.actionSelectAll, SIGNAL(triggered()), this->ui.textEdit, SLOT(selectAll()));
-	connect(this->ui.actionSelectAllOfOutput, SIGNAL(triggered()), this->ui.textShow, SLOT(selectAll()));
-	connect(this->ui.textEdit, SIGNAL(undoAvailable(bool)), this->ui.actionUndo, SLOT(setEnabled(bool)));
-	connect(this->ui.textEdit, SIGNAL(redoAvailable(bool)), this->ui.actionRedo, SLOT(setEnabled(bool)));
-	connect(this->ui.textEdit, SIGNAL(copyAvailable(bool)), this->ui.actionCopy, SLOT(setEnabled(bool)));
-	connect(this->ui.textEdit, SIGNAL(copyAvailable(bool)), this->ui.actionCut, SLOT(setEnabled(bool)));
-	connect(this->ui.textEdit, SIGNAL(copyAvailable(bool)), this->ui.actionDelete, SLOT(setEnabled(bool)));
-	connect(this->ui.textShow, SIGNAL(copyAvailable(bool)), this->ui.actionCopyFromOutput, SLOT(setEnabled(bool)));
-
 	connect(this->ui.textEdit, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
-
 	connect(&this->updateTimer, SIGNAL(timeout()), this, SLOT(updateText()));
 }
+
+
 
 void PinyinEditor::onTextChanged() {
 	this->updateTimer.start();
@@ -200,10 +188,10 @@ void PinyinEditor::closeEvent(QCloseEvent *event) {
 
 
 void PinyinEditor::about() {
-	QMessageBox msgBox(this);
-	msgBox.setWindowTitle(tr("About author"));
-	msgBox.setTextFormat(Qt::RichText);   //this is what makes the links clickable
-	msgBox.setText(
+	QMessageBox msg_box(this);
+	msg_box.setWindowTitle(tr("About author"));
+	msg_box.setTextFormat(Qt::RichText);   //this is what makes the links clickable
+	msg_box.setText(
 		tr("This is an open source application.")
 		.append(QChar::ParagraphSeparator)
 		.append(tr("Author: <a href='https://github.com/NIC0NIC0NI'>NIC0NIC0NI</a>"))
@@ -212,5 +200,5 @@ void PinyinEditor::about() {
 		.append(QChar::ParagraphSeparator)
 		.append(tr("Github repository: <a href='https://github.com/NIC0NIC0NI/Pinyin-editor.git'>"
 			"https://github.com/NIC0NIC0NI/Pinyin-editor.git</a>")));
-	msgBox.exec();
+	msg_box.exec();
 }

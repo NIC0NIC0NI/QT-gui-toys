@@ -1,5 +1,5 @@
-#ifndef FLATMAP_H
-#define FLATMAP_H
+#ifndef STATIC_MAP_H
+#define STATIC_MAP_H
 
 #include <new>
 #include <memory>
@@ -22,11 +22,15 @@ namespace memory {  // for pre-C++17 versions
 		return current;
 	}
 
+	template<class T>
+	void destroy_at(T *t) {
+		t->~T();
+	}
+
 	template<class ForwardIt>
 	void destroy(ForwardIt first, ForwardIt last) {
-		typedef typename std::iterator_traits<ForwardIt>::value_type Value;
 		for (; first != last; ++first) {
-			first->~Value();
+			destroy_at(std::addressof(*first));
 		}
 	}
 }
