@@ -1,5 +1,5 @@
-#ifndef PINYINEDITOR_H
-#define PINYINEDITOR_H
+#ifndef PINYIN_EDITOR_H
+#define PINYIN_EDITOR_H
 
 #include <QMainWindow>
 #include <QApplication>

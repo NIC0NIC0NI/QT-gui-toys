@@ -1,5 +1,7 @@
 
 #include <QTextCursor>
+#include <QChar>
+#include <QList>
 
 #include "common.h"
 #include "static_map.h"
@@ -54,9 +56,6 @@ QChar tonedChar(QChar base, QChar tone) {
 }
 
 
-#include <QChar>
-#include <QList>
-#include <QTextDocument>
 
 struct Replace {
 	int pos;

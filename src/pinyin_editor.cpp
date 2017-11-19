@@ -10,7 +10,6 @@
 #include "common.h"
 #include "pinyin_editor.h"
 
-#define LOG_TEXT(filename, text) {QFile f(filename, this);f.open(QIODevice::WriteOnly|QIODevice::Text);f.write(text.toUtf8());f.close();}
 
 PinyinEditor::PinyinEditor(QWidget *parent)
 	: QMainWindow(parent), updateTimer(this), saved(true), currentFile(nullptr) {

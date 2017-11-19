@@ -88,25 +88,28 @@ namespace container {
 		}
 
 		const_iterator begin() const noexcept {
-			return (const_iterator)elements;
+			return reinterpret_cast<const_iterator>(&storage);
 		}
 
 		const_iterator end() const noexcept {
-			return (const_iterator)elements + AllocSize;
+			return this->begin() + AllocSize;
 		}
 
 	private:
 
 		typedef std::pair<Key, T>*      _Iterator;  // no `const` for `Key`, for internal mutability
+		typedef typename std::aligned_storage<sizeof(value_type) * AllocSize, sizeof(void *)>::type Storage;
+
+		Storage storage;
+
 		_Iterator _Begin() noexcept {
-			return (_Iterator)elements;
+			return reinterpret_cast<_Iterator>(&storage);
 		}
 
 		_Iterator _End() noexcept {
-			return (_Iterator)elements + AllocSize;
+			return this->_Begin() + AllocSize;
 		}
 
-		byte elements[AllocSize * sizeof(value_type)];
 	};
 }
 #endif
