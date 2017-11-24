@@ -14,10 +14,10 @@
 namespace memory {  // for pre-C++17 versions
 	template<class InputIt, class ForwardIt>
 	inline ForwardIt uninitialized_copy(InputIt first, InputIt last, ForwardIt d_first) {
-		typedef typename std::iterator_traits<ForwardIt>::value_type Value;
+		typedef typename ::std::iterator_traits<ForwardIt>::value_type Value;
 		ForwardIt current = d_first;
 		for (; first != last; ++first, ++current) {
-			::new (static_cast<void*>(std::addressof(*current))) Value(*first);
+			::new (static_cast<void*>(::std::addressof(*current))) Value(*first);
 		}
 		return current;
 	}
@@ -30,15 +30,15 @@ namespace memory {  // for pre-C++17 versions
 	template<typename ForwardIt>
 	inline void destroy(ForwardIt first, ForwardIt last) {
 		for (; first != last; ++first) {
-			destroy_at(std::addressof(*first));
+			destroy_at(::std::addressof(*first));
 		}
 	}
 }
 
 namespace algorithm{  // why does `std::binary_search` return a bool instead of an iterator?
-	template<class ForwardIt, class Key, class Compare = std::less<Key>>
+	template<class ForwardIt, class Key, class Compare = ::std::less<Key>>
 	inline ForwardIt binary_search(ForwardIt begin, ForwardIt end, const Key& key, Compare comp) {
-		auto it = std::lower_bound(begin, end, key, comp);
+		auto it = ::std::lower_bound(begin, end, key, comp);
 		if (!(it == end) && !comp(key, *it)) {
 			return it;
 		}
@@ -66,14 +66,14 @@ namespace container {
 	template<typename Key, typename T, size_t AllocSize>
 	class static_map {
 	public:
-		typedef std::pair<const Key, T> value_type;
+		typedef ::std::pair<const Key, T> value_type;
 		typedef const value_type*       const_iterator;
 
-		static_map(std::initializer_list<value_type> init) {
+		static_map(::std::initializer_list<value_type> init) {
 			assert(init.size() == AllocSize);
 
 			memory::uninitialized_copy(init.begin(), init.end(), this->Begin());
-			std::sort(this->Begin(), this->End());
+			::std::sort(this->Begin(), this->End());
 		}
 
 		~static_map() {
@@ -97,8 +97,8 @@ namespace container {
 
 	private:
 
-		typedef std::pair<Key, T>*      Iterator;  // no `const` for `Key`, for internal mutability
-		typedef typename std::aligned_storage<sizeof(value_type) * AllocSize, sizeof(void *)>::type Storage;
+		typedef ::std::pair<Key, T>*      Iterator;  // no `const` for `Key`, for internal mutability
+		typedef typename ::std::aligned_storage<sizeof(value_type) * AllocSize, sizeof(void *)>::type Storage;
 
 		Storage storage;
 

@@ -10,7 +10,7 @@
 
 
 PinyinBianjiqi::PinyinBianjiqi(const char* startFileName, QWidget *parent)
-	: QMainWindow(parent), updateTimer(this), currentFile(nullptr) {
+	: QMainWindow(parent), updateTimer(this), currentFile(Q_NULLPTR) {
 	this->ui.setupUi(this);
 	this->updateTimer.setSingleShot(true);
 	this->updateTimer.setInterval(UPDATE_DELAY);
@@ -28,8 +28,10 @@ PinyinBianjiqi::PinyinBianjiqi(const char* startFileName, QWidget *parent)
 	connect(this->ui.textEdit, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
 	connect(&this->updateTimer, SIGNAL(timeout()), this, SLOT(updateText()));
 
-	if(startFileName != nullptr) {
-		this->openFileByName(startFileName);
+	if(startFileName != Q_NULLPTR) {
+		if (!this->openFileByName(startFileName)) {
+			QMessageBox::warning(this, tr("Error"), tr("Cannot read file \"%1\"").arg(startFileName));
+		}
 	}
 }
 
@@ -58,12 +60,14 @@ void PinyinBianjiqi::openFile() {
 	if (this->askSaveOrContinue()) {
 		auto filename = QFileDialog::getOpenFileName(this, tr("Select a file to open"), ".", tr("HTML (*.html);;Text file (*.txt)"));
 		if (!filename.isNull()) {
-			this->openFileByName(filename);
+			if (!this->openFileByName(filename)) {
+				QMessageBox::warning(this, tr("Error"), tr("Cannot read file \"%1\"").arg(filename));
+			}
 		}
 	}
 }
 
-void PinyinBianjiqi::openFileByName(const QString &filename) {
+bool PinyinBianjiqi::openFileByName(const QString &filename) {
 	QFile reader(filename, this); 
 	reader.open(QIODevice::ReadOnly | QIODevice::Text);
 	if (reader.isReadable()) {
@@ -72,10 +76,10 @@ void PinyinBianjiqi::openFileByName(const QString &filename) {
 		this->ui.textEdit->setHtml(text);
 
 		this->currentFile.reset(new QSaveFile(filename, this));
-		this->currentFile->open(QIODevice::WriteOnly | QIODevice::Text);
+		return this->currentFile->open(QIODevice::WriteOnly | QIODevice::Text);
 	}
 	else {
-		QMessageBox::warning(this, tr("Error"), tr("Cannot read file \"%1\"").arg(filename));
+		return false;
 	}
 }
 
@@ -84,8 +88,12 @@ void PinyinBianjiqi::saveFile() {
 		this->saveAsFile();
 	}
 	else {
-		this->saveFileTo(this->currentFile.data());
-		this->ui.textEdit->document()->setModified(false);
+		auto status = this->saveTextEditToFile(this->ui.textEdit, this->currentFile.data());
+		if (status == Success) {
+			this->ui.textEdit->document()->setModified(false);
+		} else if (status == Failure) {
+			QMessageBox::warning(this, tr("Error"), tr("Failed to save \"%1\"").arg(this->currentFile->fileName()));
+		}
 	}
 }
 
@@ -95,38 +103,53 @@ void PinyinBianjiqi::saveAsFile() {
 		auto file = new QSaveFile(filename, this);
 		this->currentFile.reset(file);
 		file->open(QIODevice::WriteOnly | QIODevice::Text);
-		this->saveFileTo(file);
-		this->ui.textEdit->document()->setModified(false);
+		auto status = this->saveTextEditToFile(this->ui.textEdit, file);
+		if (status == Success) {
+			this->ui.textEdit->document()->setModified(false);
+		} else if (status == Failure) {
+			QMessageBox::warning(this, tr("Error"), tr("Failed to save as \"%1\"").arg(filename));
+		}
 	}
 }
 
 void PinyinBianjiqi::saveOutput() {
-	auto filename = QFileDialog::getSaveFileName(this);
+	auto filename = QFileDialog::getSaveFileName(this, tr("Save generated file"), tr("generated.html"), tr("HTML (*.html);;Text file (*.txt)"));
 	if (!filename.isNull()) {
 		QSaveFile file(filename, this);
-		this->saveFileTo(&file);
+		if (this->saveTextEditToFile(this->ui.textShow, &file) == Failure) {
+			QMessageBox::warning(this, tr("Error"), tr("Failed to save generated file as \"%1\"").arg(filename));
+		}
 	}
 }
 
-void PinyinBianjiqi::saveFileTo(QSaveFile *file) {
+PinyinBianjiqi::SaveFileStatus PinyinBianjiqi::saveTextEditToFile(const QTextEdit *textEdit, QSaveFile *file) {
+	QByteArray data;
 	if (file->fileName().endsWith(".txt")) {
-		if (QMessageBox::question(this, tr("Save File"), 
+		if (QMessageBox::question(this, tr("Save as text file"), 
 			tr("Text format will be discarded in text file, continue to save?"),
 			QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok) {
-
-			file->write(this->ui.textEdit->toPlainText().toUtf8());
+			data = textEdit->toPlainText().toUtf8();
+		}
+		else {
+			return Canceled;
 		}
 	}
 	else {
-		file->write(this->ui.textEdit->toHtml().toUtf8());
+		data = textEdit->toHtml().toUtf8();
 	}
-	file->commit();
+	if (file->write(data) != data.size()){
+		return Failure;
+	}
+	if (! file->commit()) {
+		return Failure;
+	}
+	return Success;
 }
 
 
 bool PinyinBianjiqi::askSaveOrContinue() {
 	if (this->ui.textEdit->document()->isModified())  {
-		auto button = QMessageBox::question(this, tr("Quit"), tr("Save before quit?"),
+		auto button = QMessageBox::question(this, tr("Quit"), tr("Save current file?"),
 			QMessageBox::Save | QMessageBox::No | QMessageBox::Cancel);
 		if (button == QMessageBox::No) {
 			return true;
@@ -190,7 +213,7 @@ void PinyinBianjiqi::selectColor() {
 
 void PinyinBianjiqi::about() {
 	QMessageBox msg_box(this);
-	msg_box.setWindowTitle(tr("About Pinyin-Bianjiqi"));
+	msg_box.setWindowTitle(tr("About Pīnyīn Biānjíqì"));
 	msg_box.setTextFormat(Qt::RichText);   //this is what makes the links clickable
 	msg_box.setText(
 		tr("<p>This is an opensource software.</p>"

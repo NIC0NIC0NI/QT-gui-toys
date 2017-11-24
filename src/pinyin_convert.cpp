@@ -78,7 +78,7 @@ public:
 
 	void commit(QTextDocument * doc) {
 		QTextCursor cursor(doc);
-		for (auto replace : replaces) {
+		for (const auto& replace : replaces) {
 			cursor.setPosition(replace.pos); 
 			cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
 			auto format = cursor.charFormat();
