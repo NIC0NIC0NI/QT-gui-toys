@@ -1,4 +1,5 @@
-﻿# Pinyin-editor
+﻿# Pinyin-Bianjiqi
+
 A text editor that converts "pin1yin1" to "pīnyīn", using Qt based GUI.
 
 At first, I wanted to make a convenient tool for inputing Pinyin with tone marks. However, input methods have so many interactions with OS that it's difficult to debug and write cross-platform code. Thus this text editor is made as a alternative.
@@ -26,7 +27,7 @@ The converted text is displayed on the right. Whenver the input is edited, the o
 
 ### Cross-platform
 
-Different desktop platforms should be tested.
+Different desktop platforms should be tested. 
 
 ### Rich text support
 
