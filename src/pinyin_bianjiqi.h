@@ -1,26 +1,24 @@
-#ifndef PINYIN_EDITOR_H
-#define PINYIN_EDITOR_H
+#ifndef PINYIN_EDITOR_H_INCLUDED
+#define PINYIN_EDITOR_H_INCLUDED
 
 #include <QMainWindow>
-#include <QApplication>
 #include <QCloseEvent>
-#include <QTimerEvent>
 #include <QSaveFile>
 #include <QScopedPointer>
 #include <QTimer>
 
-#include "ui_pinyin_editor.h"
+#include "ui_pinyin_bianjiqi.h"
 
 
 static const int UPDATE_DELAY = 500; // 0.5s
 
 
-class PinyinEditor : public QMainWindow
+class PinyinBianjiqi : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    PinyinEditor(QWidget *parent = Q_NULLPTR);
+    PinyinBianjiqi(QWidget *parent = Q_NULLPTR);
 
 public slots:
 	void updateText();
@@ -36,10 +34,10 @@ public slots:
 	void about();
 
 private:
-    Ui::PinyinEditorClass ui;
+    Ui::PinyinBianjiqiClass ui;
 	QTimer updateTimer;
-	int saved;
 	QScopedPointer<QSaveFile> currentFile;
+	int saved;
 
 protected:
 	virtual void closeEvent(QCloseEvent *event);

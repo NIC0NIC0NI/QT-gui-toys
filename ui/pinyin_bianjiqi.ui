@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PinyinEditorClass</class>
- <widget class="QMainWindow" name="PinyinEditorClass">
+ <class>PinyinBianjiqiClass</class>
+ <widget class="QMainWindow" name="PinyinBianjiqiClass">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>PinyinEditor</string>
+   <string>Pinyin Bianjiqi</string>
   </property>
   <property name="locale">
    <locale language="Chinese" country="China"/>
@@ -61,7 +61,7 @@
      <x>0</x>
      <y>0</y>
      <width>1083</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -256,7 +256,7 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>Pinyin Editor</string>
+    <string>Pinyin Bianjiqi</string>
    </property>
   </action>
   <action name="actionColor">
@@ -267,7 +267,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="pinyin_editor.qrc"/>
+  <include location="pinyin_bianjiqi.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -497,7 +497,7 @@
   <connection>
    <sender>actionExit</sender>
    <signal>triggered()</signal>
-   <receiver>PinyinEditorClass</receiver>
+   <receiver>PinyinBianjiqiClass</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">

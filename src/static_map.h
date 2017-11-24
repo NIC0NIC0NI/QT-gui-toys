@@ -1,5 +1,5 @@
-#ifndef STATIC_MAP_H
-#define STATIC_MAP_H
+#ifndef STATIC_MAP_H_INCLUDED
+#define STATIC_MAP_H_INCLUDED
 
 #include <new>
 #include <memory>
@@ -13,7 +13,7 @@
 
 namespace memory {  // for pre-C++17 versions
 	template<class InputIt, class ForwardIt>
-	ForwardIt uninitialized_copy(InputIt first, InputIt last, ForwardIt d_first) {
+	inline ForwardIt uninitialized_copy(InputIt first, InputIt last, ForwardIt d_first) {
 		typedef typename std::iterator_traits<ForwardIt>::value_type Value;
 		ForwardIt current = d_first;
 		for (; first != last; ++first, ++current) {
@@ -22,13 +22,13 @@ namespace memory {  // for pre-C++17 versions
 		return current;
 	}
 
-	template<class T>
-	void destroy_at(T *t) {
-		t->~T();
+	template<typename Type>
+	inline void destroy_at(Type *p) {
+		p->~Type();
 	}
 
-	template<class ForwardIt>
-	void destroy(ForwardIt first, ForwardIt last) {
+	template<typename ForwardIt>
+	inline void destroy(ForwardIt first, ForwardIt last) {
 		for (; first != last; ++first) {
 			destroy_at(std::addressof(*first));
 		}
@@ -37,7 +37,7 @@ namespace memory {  // for pre-C++17 versions
 
 namespace algorithm{  // why does `std::binary_search` return a bool instead of an iterator?
 	template<class ForwardIt, class Key, class Compare = std::less<Key>>
-	ForwardIt binary_search(ForwardIt begin, ForwardIt end, const Key& key, Compare comp) {
+	inline ForwardIt binary_search(ForwardIt begin, ForwardIt end, const Key& key, Compare comp) {
 		auto it = std::lower_bound(begin, end, key, comp);
 		if (!(it == end) && !comp(key, *it)) {
 			return it;
@@ -51,6 +51,7 @@ namespace algorithm{  // why does `std::binary_search` return a bool instead of 
 namespace container {
 	template<class Pair, class Key>
 	struct CompareKey {
+		CompareKey() {}
 		bool operator()(const Pair & a, const Key & b) {
 			return a.first < b;
 		}
@@ -71,20 +72,19 @@ namespace container {
 		static_map(std::initializer_list<value_type> init) {
 			assert(init.size() == AllocSize);
 
-			memory::uninitialized_copy(init.begin(), init.end(), this->_Begin());
-			std::sort(this->_Begin(), this->_End());
+			memory::uninitialized_copy(init.begin(), init.end(), this->Begin());
+			std::sort(this->Begin(), this->End());
 		}
 
 		~static_map() {
-			memory::destroy(this->_Begin(), this->_End());
+			memory::destroy(this->Begin(), this->End());
 		}
 
 		// only implemented used methods
 
 		template<typename K>
 		const_iterator find(const K & x) const {
-			CompareKey<value_type, K> comp;
-			return algorithm::binary_search(this->begin(), this->end(), x, comp);
+			return algorithm::binary_search(this->begin(), this->end(), x, CompareKey<value_type, K>());
 		}
 
 		const_iterator begin() const noexcept {
@@ -97,17 +97,17 @@ namespace container {
 
 	private:
 
-		typedef std::pair<Key, T>*      _Iterator;  // no `const` for `Key`, for internal mutability
+		typedef std::pair<Key, T>*      Iterator;  // no `const` for `Key`, for internal mutability
 		typedef typename std::aligned_storage<sizeof(value_type) * AllocSize, sizeof(void *)>::type Storage;
 
 		Storage storage;
 
-		_Iterator _Begin() noexcept {
-			return reinterpret_cast<_Iterator>(&storage);
+		Iterator Begin() noexcept {
+			return reinterpret_cast<Iterator>(&storage);
 		}
 
-		_Iterator _End() noexcept {
-			return this->_Begin() + AllocSize;
+		Iterator End() noexcept {
+			return this->Begin() + AllocSize;
 		}
 
 	};

@@ -1,5 +1,3 @@
-
-#include <QHBoxLayout>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFontDialog>
@@ -8,11 +6,11 @@
 #include <QFile>
 
 #include "common.h"
-#include "pinyin_editor.h"
+#include "pinyin_bianjiqi.h"
 
 
-PinyinEditor::PinyinEditor(QWidget *parent)
-	: QMainWindow(parent), updateTimer(this), saved(true), currentFile(nullptr) {
+PinyinBianjiqi::PinyinBianjiqi(QWidget *parent)
+	: QMainWindow(parent), updateTimer(this), currentFile(nullptr), saved(true) {
 	this->ui.setupUi(this);
 	this->updateTimer.setSingleShot(true);
 	this->updateTimer.setInterval(UPDATE_DELAY);
@@ -31,24 +29,22 @@ PinyinEditor::PinyinEditor(QWidget *parent)
 	connect(&this->updateTimer, SIGNAL(timeout()), this, SLOT(updateText()));
 }
 
-
-
-void PinyinEditor::onTextChanged() {
+void PinyinBianjiqi::onTextChanged() {
 	this->updateTimer.start();
 	this->saved = false;
 }
 
-void PinyinEditor::updateText() {
+void PinyinBianjiqi::updateText() {
 	auto doc = this->ui.textEdit->document()->clone(this->ui.textShow);
 	convertPinyin(doc);
 	this->ui.textShow->setDocument(doc);
 }
 
-void PinyinEditor::deleteSelectedText() {
+void PinyinBianjiqi::deleteSelectedText() {
 	this->ui.textEdit->textCursor().removeSelectedText();
 }
 
-void PinyinEditor::newFile() {
+void PinyinBianjiqi::newFile() {
 	if (this->askSaveOrContinue()) {
 		this->currentFile.reset();
 		this->ui.textEdit->clear();
@@ -56,7 +52,7 @@ void PinyinEditor::newFile() {
 	}
 }
 
-void PinyinEditor::openFile() {
+void PinyinBianjiqi::openFile() {
 	if (this->askSaveOrContinue()) {
 		auto filename = QFileDialog::getOpenFileName(this, tr("Select a file to open"), ".", tr("HTML (*.html);;Text file (*.txt)"));
 		if (!filename.isNull()) {
@@ -78,7 +74,7 @@ void PinyinEditor::openFile() {
 	}
 }
 
-void PinyinEditor::saveFile() {
+void PinyinBianjiqi::saveFile() {
 	if (this->currentFile.isNull()) {
 		this->saveAsFile();
 	}
@@ -89,8 +85,8 @@ void PinyinEditor::saveFile() {
 	}
 }
 
-void PinyinEditor::saveAsFile() {
-	auto filename = QFileDialog::getSaveFileName(this, tr("Save File"), "untitled.html", tr("HTML (*.html);;Text file (*.txt)"));
+void PinyinBianjiqi::saveAsFile() {
+	auto filename = QFileDialog::getSaveFileName(this, tr("Save as file"), tr("untitled.html"), tr("HTML (*.html);;Text file (*.txt)"));
 	if (!filename.isNull()) {
 		this->currentFile.reset(new QSaveFile(filename, this));
 		this->currentFile->open(QIODevice::WriteOnly | QIODevice::Text);
@@ -111,7 +107,7 @@ void PinyinEditor::saveAsFile() {
 	}
 }
 
-void PinyinEditor::saveOutput() {
+void PinyinBianjiqi::saveOutput() {
 	auto filename = QFileDialog::getSaveFileName(this);
 	if (!filename.isNull()) {
 		QSaveFile file(filename, this);
@@ -122,7 +118,7 @@ void PinyinEditor::saveOutput() {
 }
 
 
-void PinyinEditor::selectFont() {
+void PinyinBianjiqi::selectFont() {
 	bool ok;
 	auto textEdit = this->ui.textEdit;
 	auto font = QFontDialog::getFont(&ok, textEdit->currentFont(), this, tr("Select font"));
@@ -139,7 +135,7 @@ void PinyinEditor::selectFont() {
 	}
 }
 
-void PinyinEditor::selectColor() {
+void PinyinBianjiqi::selectColor() {
 	auto textEdit = this->ui.textEdit;
 	auto color = QColorDialog::getColor(this->ui.textEdit->textColor(), this, tr("Select color"));
 	if (color.isValid()) {
@@ -156,7 +152,7 @@ void PinyinEditor::selectColor() {
 	}
 }
 
-bool PinyinEditor::askSaveOrContinue() {
+bool PinyinBianjiqi::askSaveOrContinue() {
 	if (this->saved) {
 		return true;
 	}
@@ -176,7 +172,7 @@ bool PinyinEditor::askSaveOrContinue() {
 	}
 }
 
-void PinyinEditor::closeEvent(QCloseEvent *event) {
+void PinyinBianjiqi::closeEvent(QCloseEvent *event) {
 	if (this->askSaveOrContinue()) {
 		event->accept();
 	}
@@ -186,18 +182,14 @@ void PinyinEditor::closeEvent(QCloseEvent *event) {
 }
 
 
-void PinyinEditor::about() {
+void PinyinBianjiqi::about() {
 	QMessageBox msg_box(this);
-	msg_box.setWindowTitle(tr("About author"));
+	msg_box.setWindowTitle(tr("About Pinyin-Bianjiqi"));
 	msg_box.setTextFormat(Qt::RichText);   //this is what makes the links clickable
 	msg_box.setText(
-		tr("This is an open source application.")
-		.append(QChar::ParagraphSeparator)
-		.append(tr("Author: <a href='https://github.com/NIC0NIC0NI'>NIC0NIC0NI</a>"))
-		.append(QChar::ParagraphSeparator)
-		.append(tr("License: <a href='http://doc.qt.io/qt-5/lgpl.html'>GNU LGPL version 3</a>"))
-		.append(QChar::ParagraphSeparator)
-		.append(tr("Github repository: <a href='https://github.com/NIC0NIC0NI/Pinyin-editor.git'>"
-			"https://github.com/NIC0NIC0NI/Pinyin-editor.git</a>")));
+		tr("<p>This is an opensource application.</p>"
+		"<p>Author: <a href='https://github.com/NIC0NIC0NI'>NIC0NIC0NI</a></p>"
+		"<p>License: <a href='http://doc.qt.io/qt-5/lgpl.html'>GNU LGPL version 3</a></p>"
+		"<p>View source code: <a href='https://github.com/NIC0NIC0NI/Pinyin-Bianjiqi.git'>Pinyin-Bianjiqi.git</a></p>"));
 	msg_box.exec();
 }

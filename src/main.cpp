@@ -1,10 +1,10 @@
-#include "pinyin_editor.h"
+#include "pinyin_bianjiqi.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    PinyinEditor w;
+    PinyinBianjiqi w;
     w.show();
     return a.exec();
 }

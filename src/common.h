@@ -1,12 +1,11 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef COMMON_H_INCLUDED
+#define COMMON_H_INCLUDED
 
 #include <cstddef>
 #include <cstdint>
 #include <QTextDocument>
 
 typedef std::size_t size_t;
-typedef std::uint8_t byte;
 
 void convertPinyin(QTextDocument * doc);
 
