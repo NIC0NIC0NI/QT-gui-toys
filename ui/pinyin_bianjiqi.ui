@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Pīnyīn Biānjíqì</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../rsrc/pinyin_bianjiqi.qrc">
+    <normaloff>:/icon/icon.png</normaloff>:/icon/icon.png</iconset>
+  </property>
   <property name="locale">
    <locale language="Chinese" country="China"/>
   </property>
@@ -267,7 +271,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="pinyin_bianjiqi.qrc"/>
+  <include location="../rsrc/pinyin_bianjiqi.qrc"/>
  </resources>
  <connections>
   <connection>

@@ -15,3 +15,5 @@ HEADERS  += src/common.h \
      src/pinyin_bianjiqi.h
 
 FORMS    += ui/pinyin_bianjiqi.ui
+
+RESOURCES += rsrc/pinyin_bianjiqi.qrc
