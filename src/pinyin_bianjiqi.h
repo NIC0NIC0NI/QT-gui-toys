@@ -1,15 +1,15 @@
 #ifndef PINYIN_EDITOR_H_INCLUDED
-#define PINYIN_EDITOR_H_INCLUDED
+#define PINYIN_EDITOR_H_INCLUDED 1
 
 #include <QMainWindow>
 #include <QCloseEvent>
 #include <QSaveFile>
-#include <QScopedPointer>
 #include <QTimer>
 
 #include "ui_pinyin_bianjiqi.h"
+#include "cpp17_support.h"
 
-static const int UPDATE_DELAY = 500; // 0.5s
+static const int UPDATE_DELAY = 150; // 0.15s
 
 class PinyinBianjiqi : public QMainWindow
 {
@@ -35,13 +35,14 @@ public slots:
 private:
     Ui::PinyinBianjiqiClass ui;
 	QTimer updateTimer;
-	QScopedPointer<QSaveFile> currentFile;
+	utility::optional<QSaveFile> currentFile;
 
 protected:
 	virtual void closeEvent(QCloseEvent *event);
 	bool askSaveOrContinue();
 	bool openFileByName(const QString &filename);
-	SaveFileStatus saveTextEditToFile(const QTextEdit *textEdit, QSaveFile *file);
+	SaveFileStatus saveTextEditToFile(const QTextEdit &textEdit, QSaveFile *file);
+	void errorMessage(const QString &msg);
 };
 
 #endif

@@ -1,5 +1,5 @@
 #ifndef COMMON_H_INCLUDED
-#define COMMON_H_INCLUDED
+#define COMMON_H_INCLUDED 1
 
 #include <cstddef>
 #include <QTextDocument>

@@ -12,6 +12,7 @@ SOURCES += src/main.cpp \
 
 HEADERS  += src/common.h \
      src/static_map.h \
+     src/cpp17_support.h \
      src/pinyin_bianjiqi.h
 
 FORMS    += ui/pinyin_bianjiqi.ui
