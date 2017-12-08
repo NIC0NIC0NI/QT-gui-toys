@@ -78,7 +78,7 @@ bool PinyinBianjiqi::openFileByName(const QString &filename) {
         reader.close();
         this->ui.textEdit->setHtml(text);
 
-		return this->currentFile.emplace(filename, this)
+        return this->currentFile.emplace(filename, this)
                 .open(QIODevice::WriteOnly | QIODevice::Text);
     }
     else {
@@ -99,7 +99,7 @@ void PinyinBianjiqi::saveFile() {
                 tr("Failed to save \"%1\"").arg(this->currentFile->fileName()));
         }
     }
-	else {
+    else {
         this->saveAsFile();
     }
 }

@@ -17,32 +17,32 @@ class PinyinBianjiqi : public QMainWindow
 
 public:
     PinyinBianjiqi(const char* startFileName, QWidget *parent = Q_NULLPTR);
-	enum SaveFileStatus {Success, Failure, Canceled};
+    enum SaveFileStatus {Success, Failure, Canceled};
 
 public slots:
-	void updateText();
-	void onTextChanged();
-	void deleteSelectedText();
-	void newFile();
-	void openFile();
-	void saveFile();
-	void saveAsFile();
-	void saveOutput();
-	void selectFont();
-	void selectColor();
-	void about();
+    void updateText();
+    void onTextChanged();
+    void deleteSelectedText();
+    void newFile();
+    void openFile();
+    void saveFile();
+    void saveAsFile();
+    void saveOutput();
+    void selectFont();
+    void selectColor();
+    void about();
 
 private:
     Ui::PinyinBianjiqiClass ui;
-	QTimer updateTimer;
-	utility::optional<QSaveFile> currentFile;
+    QTimer updateTimer;
+    utility::optional<QSaveFile> currentFile;
 
 protected:
-	virtual void closeEvent(QCloseEvent *event);
-	bool askSaveOrContinue();
-	bool openFileByName(const QString &filename);
-	SaveFileStatus saveTextEditToFile(const QTextEdit &textEdit, QSaveFile *file);
-	void errorMessage(const QString &msg);
+    virtual void closeEvent(QCloseEvent *event);
+    bool askSaveOrContinue();
+    bool openFileByName(const QString &filename);
+    SaveFileStatus saveTextEditToFile(const QTextEdit &textEdit, QSaveFile *file);
+    void errorMessage(const QString &msg);
 };
 
 #endif

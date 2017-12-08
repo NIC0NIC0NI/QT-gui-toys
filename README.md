@@ -6,8 +6,6 @@ At first, I wanted to make a convenient tool for inputing Pinyin with tone marks
 
 ## Compile
 
-Window 7 64bit with MSVC and MingW is tested. The user interface is based on Qt, so it should be able to compile and run on other desktop platforms.
-
 ```
 mkdir build
 cd build
@@ -15,11 +13,18 @@ qmake -o Makefile ../PinyinEditor.pro [options]
 make
 ```
 
-In `[options]`, you can use `-spec` to choose the target, eg: `-spec win32-msvc2015`, `-spec win32-g++`.
-
 For Windows, if compiling with MSVC, replace `make` with `nmake`; if compiling with MingW-G++, replace `make` with `mingw32-make`.
 
+###Tested platforms
+
+* Windows 7, 64-bits (MSVC / MingW)
+* Ubuntu 16, 64-bits (GCC / Clang)
+
 ## Potential issues
+
+### Icon of the executable
+
+Setting the icon is platform specific. In order not to upload too many binary files such as `.ico` and `icns`, the repository here does not change the icon of the executable.
 
 ### Smooth interaction
 
@@ -27,7 +32,7 @@ The converted text is displayed on the right. Whenver the input is edited, the o
 
 ### Cross-platform
 
-Different desktop platforms should be tested. 
+Different desktop platforms should be tested, especially Mac OSX.
 
 ### Rich text support
 
