@@ -15,7 +15,7 @@ make
 
 For Windows, if compiling with MSVC, replace `make` with `nmake`; if compiling with MingW-G++, replace `make` with `mingw32-make`.
 
-###Tested platforms
+### Tested platforms
 
 * Windows 7, 64-bits (MSVC / MingW)
 * Ubuntu 16, 64-bits (GCC / Clang)
