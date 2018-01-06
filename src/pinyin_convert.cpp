@@ -40,7 +40,7 @@ static const container::static_map<QChar, size_t, 14> VOWEL_NUMBER{
 };
 
 inline size_t vowelNumber(QChar c) {
-    return VOWEL_NUMBER.find(c)->second;
+    return VOWEL_NUMBER.find(c)->value();
 }
 
 inline bool isVowel(QChar c) {
