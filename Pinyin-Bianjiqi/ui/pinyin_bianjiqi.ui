@@ -46,6 +46,9 @@
          <pointsize>14</pointsize>
         </font>
        </property>
+       <property name="readOnly">
+        <bool>false</bool>
+       </property>
       </widget>
       <widget class="QTextEdit" name="textShow">
        <property name="font">
@@ -53,6 +56,9 @@
          <family>Times New Roman</family>
          <pointsize>14</pointsize>
         </font>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
      </widget>
@@ -65,7 +71,7 @@
      <x>0</x>
      <y>0</y>
      <width>1083</width>
-     <height>25</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

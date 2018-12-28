@@ -250,8 +250,8 @@ void PinyinBianjiqi::about() {
         "<p>Author: <a href='https://github.com/NIC0NIC0NI'>NIC0NIC0NI</a></p>"
         "<p>License: <a href='http://doc.qt.io/qt-5/lgpl.html'>GNU LGPL version 3</a></p>"
         "<p>View source code: "
-        "<a href='https://github.com/NIC0NIC0NI/Pinyin-Bianjiqi.git'>"
-        "Pinyin-Bianjiqi.git</a></p>")
+        "<a href='https://github.com/NIC0NIC0NI/QT-gui-toys.git'>"
+        "QT-gui-toys.git</a></p>")
     );
     msg_box.exec();
 }

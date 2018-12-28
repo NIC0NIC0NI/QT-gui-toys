@@ -5,9 +5,10 @@ Some toys with QT-based GUI.
 ## Compile
 
 ```
+cd ${PROJECT_DIRECTORY}
 mkdir build
 cd build
-qmake -o Makefile ../PinyinEditor.pro [options]
+qmake -o Makefile ../${PROJECT_NAME}.pro [options]
 make
 ```
 
