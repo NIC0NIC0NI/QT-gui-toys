@@ -9,7 +9,7 @@ class SortingNetworkBuilder {
 public:
     /* r1 < r2 */
     virtual void addComparator(int r1, int r2) = 0;
-    virtual void addLevel() = 0;
+    virtual void addLevel() {};
 };
 
 class SortingNetworkPainter : public SortingNetworkBuilder {
@@ -23,9 +23,8 @@ protected:
     void addComparatorImpl(int i, int j, int column_base);
 public:
     SortingNetworkPainter(int n, int m, int width, int height, \
-                const QColor& lines = Qt::black, const QColor& background = Qt::white);
+                const QColor& lines, const QColor& background);
     void addComparator(int i, int j) override;
-    void addLevel() override {}
     QPixmap picture() const;
     int operations() const { return ops; }
 };
@@ -35,7 +34,7 @@ class LevelSortingNetworkPainter : public SortingNetworkPainter {
     int column_base;
 public:
     LevelSortingNetworkPainter(int n, int m, int width, int height, \
-                const QColor& lines = Qt::black, const QColor& background = Qt::white);
+                const QColor& lines, const QColor& background);
     void addComparator(int i, int j) override;
     void addLevel() override;
     int levels() const;

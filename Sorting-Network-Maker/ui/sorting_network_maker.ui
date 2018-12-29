@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>408</height>
+    <width>1280</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -29,9 +29,27 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <layout class="QGridLayout" name="gridLayout">
+     <layout class="QGridLayout" name="gridLayout" columnstretch="3,1" columnminimumwidth="0,0">
+      <property name="leftMargin">
+       <number>32</number>
+      </property>
+      <property name="rightMargin">
+       <number>32</number>
+      </property>
+      <property name="horizontalSpacing">
+       <number>32</number>
+      </property>
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="spacing">
+         <number>32</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QComboBox" name="selectAlgorithm">
           <property name="minimumSize">
@@ -67,6 +85,11 @@
           </item>
           <item>
            <property name="text">
+            <string>Merge-exchange</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>Pairwise (bottom-up)</string>
            </property>
           </item>
@@ -89,6 +112,12 @@
         </item>
         <item>
          <widget class="QLabel" name="sizeLabel">
+          <property name="minimumSize">
+           <size>
+            <width>128</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="text">
            <string>Input size:</string>
           </property>
@@ -96,6 +125,15 @@
         </item>
         <item>
          <widget class="QSpinBox" name="selectSize">
+          <property name="minimumSize">
+           <size>
+            <width>128</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>128</number>
+          </property>
           <property name="value">
            <number>8</number>
           </property>
@@ -111,6 +149,12 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="minimumSize">
+         <size>
+          <width>128</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>generate</string>
         </property>
@@ -121,6 +165,12 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
+        <property name="minimumSize">
+         <size>
+          <width>128</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>save</string>
         </property>
@@ -128,8 +178,23 @@
       </item>
       <item row="1" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <property name="spacing">
+         <number>32</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QLabel" name="sizeLabel_2">
+          <property name="minimumSize">
+           <size>
+            <width>256</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="text">
            <string>Picture resolution:</string>
           </property>
@@ -137,13 +202,31 @@
         </item>
         <item>
          <widget class="QSpinBox" name="selectWidth">
+          <property name="minimumSize">
+           <size>
+            <width>128</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>128</number>
+          </property>
           <property name="value">
-           <number>16</number>
+           <number>32</number>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QSpinBox" name="selectHeight">
+          <property name="minimumSize">
+           <size>
+            <width>128</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>128</number>
+          </property>
           <property name="value">
            <number>32</number>
           </property>
@@ -154,19 +237,56 @@
      </layout>
     </item>
     <item>
-     <widget class="QLabel" name="showPicture">
+     <widget class="QScrollArea" name="scrollArea">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>1</horstretch>
         <verstretch>1</verstretch>
        </sizepolicy>
       </property>
-      <property name="text">
-       <string/>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>256</height>
+       </size>
       </property>
-      <property name="scaledContents">
+      <property name="widgetResizable">
        <bool>true</bool>
       </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>1266</width>
+         <height>600</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="showPicture">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -176,7 +296,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>1280</width>
      <height>17</height>
     </rect>
    </property>
@@ -195,7 +315,15 @@
     <addaction name="actionAbout"/>
     <addaction name="actionQt"/>
    </widget>
+   <widget class="QMenu" name="menuAppearance">
+    <property name="title">
+     <string>Appearance</string>
+    </property>
+    <addaction name="actionLineColor"/>
+    <addaction name="actionBackgroundColor"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuAppearance"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -231,6 +359,16 @@
   <action name="actionAbout">
    <property name="text">
     <string>Sorting Network Maker</string>
+   </property>
+  </action>
+  <action name="actionLineColor">
+   <property name="text">
+    <string>Line Color</string>
+   </property>
+  </action>
+  <action name="actionBackgroundColor">
+   <property name="text">
+    <string>Background Color</string>
    </property>
   </action>
  </widget>

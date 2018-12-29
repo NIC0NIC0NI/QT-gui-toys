@@ -1,19 +1,22 @@
 #include <cstddef>
+#include <QSize>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QSaveFile>
-#include <QFile>
+#include <QColorDialog>
 
 #include "sorting_network_maker.h"
 
 SortingNetworkMaker::SortingNetworkMaker(QWidget *parent)
-    : QMainWindow(parent), generated(false), saved(false) {
+    : QMainWindow(parent), generated(false), saved(false),
+    lines(Qt::black), background(Qt::white) {
     this->ui.setupUi(this);
     connect(this->ui.actionQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
     connect(this->ui.actionAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(this->ui.actionSave, SIGNAL(triggered()), this, SLOT(save()));
     connect(this->ui.buttonSave, SIGNAL(clicked()), this, SLOT(save()));
     connect(this->ui.buttonGenerate, SIGNAL(clicked()), this, SLOT(generate()));
+    connect(this->ui.actionLineColor, SIGNAL(triggered()), this, SLOT(selectLineColor()));
+    connect(this->ui.actionBackgroundColor, SIGNAL(triggered()), this, SLOT(selectBackgroundColor()));
 }
 
 void SortingNetworkMaker::save() {
@@ -34,27 +37,42 @@ void SortingNetworkMaker::save() {
     }
 }
 
+void SortingNetworkMaker::selectLineColor() {
+    auto color = QColorDialog::getColor(this->lines, this, tr("Select line color"));
+    if (color.isValid()) {
+        this->lines = color;
+    }
+}
+
+void SortingNetworkMaker::selectBackgroundColor() {
+    auto color = QColorDialog::getColor(this->background, this, tr("Select background color"));
+    if (color.isValid()) {
+        this->background = color;
+    }
+}
+
+void SortingNetworkMaker::refresh() {
+    auto size = this->ui.scrollArea->size() - QSize(32,32);
+    this->ui.showPicture->resize(size);
+    this->ui.showPicture->setPixmap(this->picture.scaled(size, Qt::IgnoreAspectRatio
+        //, Qt::SmoothTransformation
+    ));
+}
+
 void SortingNetworkMaker::generate() {
     auto n = this->ui.selectSize->value();
     auto width = this->ui.selectWidth->value();
     auto height = this->ui.selectHeight->value();
     auto index = this->ui.selectAlgorithm->currentIndex();
-    SortingNetworkPainter builder(n, estimate_columns(index, n), width, height);
-
+    SortingNetworkPainter builder(n, estimate_columns(index, n), \
+                                  width, height, this->lines, this->background);
     generate_network(index, n, &builder);
-
     this->picture = builder.picture();
-    this->ui.showPicture->setPixmap(
-        this->picture.scaled(
-            this->ui.showPicture->size(),
-            Qt::IgnoreAspectRatio, 
-            Qt::SmoothTransformation
-        )
-    );
     this->ui.actionSave->setEnabled(true);
     this->ui.buttonSave->setEnabled(true);
     this->saved = false;
     this->generated = true;
+    this->refresh();
 }
 
 bool SortingNetworkMaker::askSaveOrContinue() {

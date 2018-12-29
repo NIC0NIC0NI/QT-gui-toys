@@ -43,17 +43,24 @@ void SortingNetworkPainter::addComparatorImpl(int r1, int r2, int column_base) {
         auto i2 = begin + c * this->n + r2 + 1;
 
         if(all_of(i1, i2)) {
-            const int lw = this->lw_vert;
-            const int x = c * this->width + (this->width - lw) / 2;
-            const int y1 = r1 * this->height + (this->height - this->lw_hori + 1) / 2;
-            const int dy = (r2 - r1) * this->height;
-            const int radius = std::min(this->width, this->height) / 8;
-            this->painter.fillRect(x, y1, lw, dy, this->color);
+            const int lw_vert = this->lw_vert;
+            const int lw_hori = this->lw_hori;
+            const int width = this->width;
+            const int height = this->height;
+            const int dy = (r2 - r1) * height;
+            const int radius = std::min(width, height) / 8;
+            const int x = c * width;
+            const int y1 = r1 * height;
+            this->painter.fillRect(
+                x + (width - lw_vert + 1) / 2, 
+                y1 + (height - lw_hori + 1) / 2, 
+                lw_vert, dy, this->color
+            );
             for(int i = - radius; i < radius; ++i) {
                 int chord = (int)std::sqrt(radius * radius - i*i);
                 for(int j = y1 - chord; j < y1 + chord; ++j) {
-                    this->painter.drawPoint(x + i, j);
-                    this->painter.drawPoint(x + i, dy + j);
+                    this->painter.drawPoint(x + i + width / 2, j + height / 2);
+                    this->painter.drawPoint(x + i + width / 2, dy + j + height / 2);
                 }
             }
             std::fill(i1, i2, false);

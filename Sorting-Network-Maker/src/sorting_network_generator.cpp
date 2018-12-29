@@ -152,6 +152,26 @@ void generate_odd_even_bottom_up(SortingNetworkBuilder *builder, int n) {
     }
 }
 
+
+void generate_batcher(SortingNetworkBuilder *builder, int n) {
+    const int l = ceil_pow_2(n);
+    for(int p = 1 << (l - 1); p > 0; p >>= 1) {
+        int q = 1 << (l - 1);
+        int r = 0;
+        int d = p;
+        while(d > 0) {
+            for(int i = 0; i < n - d; ++i) {
+                if((i & p) == r){
+                    builder->addComparator(i, i + d);
+                }
+            }
+            d = q - p;
+            q >>= 1;
+            r = p;
+        }
+    }
+}
+
 void generate_pairwise_bottom_up(SortingNetworkBuilder *builder, int n) {
     const int l = ceil_pow_2(n);
 
@@ -278,13 +298,11 @@ start:
 }
 
 void generate_hibbard(SortingNetworkBuilder *builder, int n) {
-    const int l = ceil_pow_2(n - 1);
-    const int lastbit = 1 << l;
-    hibbard::generate(builder, n, lastbit, 0, 1);
+    hibbard::generate(builder, n, 1 << ceil_pow_2(n - 1), 0, 1);
 }
 
 void generate_balanced(SortingNetworkBuilder *builder, int n) {
-    int l = ceil_pow_2(n);
+    const int l = ceil_pow_2(n);
     for(int k = 0; k < l; ++k) {
         for(int curr = 1 << l; curr > 1; curr >>= 1) {
             for(int i = 0; i < (1 << l); i += curr) {
@@ -330,6 +348,7 @@ static const Generator generators[] = {
     generate_bitonic_top_down,
     generate_odd_even_bottom_up,
     generate_odd_even_top_down,
+    generate_batcher,
     generate_pairwise_bottom_up,
     generate_bose_nelson,
     generate_hibbard,
@@ -344,6 +363,7 @@ typedef int (*Estimator)(int n, int l);
 
 static const Estimator estimators[] = {
     estimate_bubble,
+    estimate_bitonic_and_odd_even,
     estimate_bitonic_and_odd_even,
     estimate_bitonic_and_odd_even,
     estimate_bitonic_and_odd_even,
