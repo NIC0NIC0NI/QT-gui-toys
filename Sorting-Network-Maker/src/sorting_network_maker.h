@@ -3,8 +3,8 @@
 
 #include <QString>
 #include <QMainWindow>
-#include <QSaveFile>
 #include <QCloseEvent>
+#include <QPixmap>
 #include "ui_sorting_network_maker.h"
 #include "generators.h"
 
@@ -22,7 +22,7 @@ public slots:
 
 private:
     Ui::SortingNetworkMakerClass ui;
-    GeneratedResult result;
+    QPixmap picture;
     bool generated, saved;
 
 protected:

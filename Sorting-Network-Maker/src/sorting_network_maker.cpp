@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QFile>
+#include <QSaveFile>
 #include <QFile>
 
 #include "sorting_network_maker.h"
@@ -18,7 +18,7 @@ SortingNetworkMaker::SortingNetworkMaker(QWidget *parent)
 
 void SortingNetworkMaker::save() {
     auto filename = QFileDialog::getSaveFileName(
-        this, 
+        this,
         tr("Save figure"), 
         tr("untitled.png"), 
         tr("Portable Network Graphics (*.png);;"
@@ -29,7 +29,7 @@ void SortingNetworkMaker::save() {
         "X11 Pixmap (*.xpm)")
     );
     if (!filename.isNull()) {
-        this->result.picture.save(filename, nullptr, 100);
+        this->picture.save(filename, nullptr, 95);
         this->saved = true;
     }
 }
@@ -39,10 +39,22 @@ void SortingNetworkMaker::generate() {
     auto width = this->ui.selectWidth->value();
     auto height = this->ui.selectHeight->value();
     auto index = this->ui.selectAlgorithm->currentIndex();
-    generate_network(&this->result, index, n, width, height);
-    this->ui.label->setPixmap(this->result.picture);
-    this->generated = true;
+    SortingNetworkPainter builder(n, estimate_columns(index, n), width, height);
+
+    generate_network(index, n, &builder);
+
+    this->picture = builder.picture();
+    this->ui.showPicture->setPixmap(
+        this->picture.scaled(
+            this->ui.showPicture->size(),
+            Qt::IgnoreAspectRatio, 
+            Qt::SmoothTransformation
+        )
+    );
+    this->ui.actionSave->setEnabled(true);
+    this->ui.buttonSave->setEnabled(true);
     this->saved = false;
+    this->generated = true;
 }
 
 bool SortingNetworkMaker::askSaveOrContinue() {
@@ -78,7 +90,7 @@ void SortingNetworkMaker::closeEvent(QCloseEvent *event) {
     }
 }
 
-void SortingNetworkMaker::errorMessage(const QString &msg){
+void SortingNetworkMaker::errorMessage(const QString &msg) {
     QMessageBox::warning(this, tr("Error"), msg);
 }
 

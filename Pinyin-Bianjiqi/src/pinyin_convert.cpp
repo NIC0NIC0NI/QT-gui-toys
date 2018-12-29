@@ -1,7 +1,7 @@
 
 #include <QTextCursor>
 #include <QChar>
-#include <QList>
+#include <QVector>
 
 #include "common.h"
 #include "static_map.h"
@@ -60,12 +60,13 @@ inline QChar tonedChar(QChar base, QChar tone) {
 struct Replace {
     int pos;
     QChar character;
+    Replace() {}
     Replace(int p, QChar c) :pos(p), character(c) {}
 };
 
 class ChangeList {
-    QList<Replace> replaces;
-    QList<int> removes;
+    QVector<Replace> replaces;
+    QVector<int> removes;
 public:
     void replace(int pos, QChar c) {
         Replace r(pos, c);

@@ -27,126 +27,149 @@
    <locale language="Chinese" country="China"/>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="verticalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>581</width>
-      <height>341</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QComboBox" name="selectAlgorithm">
-           <property name="minimumSize">
-            <size>
-             <width>256</width>
-             <height>0</height>
-            </size>
-           </property>
-           <item>
-            <property name="text">
-             <string>Bitonic (bottom-up)</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Odd-even merge (bottom-up)</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Pairwise (bottom-up)</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="sizeLabel">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QComboBox" name="selectAlgorithm">
+          <property name="minimumSize">
+           <size>
+            <width>256</width>
+            <height>0</height>
+           </size>
+          </property>
+          <item>
            <property name="text">
-            <string>Input size:</string>
+            <string>Bubble</string>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="selectSize">
-           <property name="value">
-            <number>8</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="0" column="1">
-        <widget class="QPushButton" name="buttonGenerate">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>generate</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QPushButton" name="buttonSave">
-         <property name="text">
-          <string>save</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QLabel" name="sizeLabel_2">
+          </item>
+          <item>
            <property name="text">
-            <string>Picture size:</string>
+            <string>Bitonic (bottom-up)</string>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="selectWidth">
-           <property name="value">
-            <number>16</number>
+          </item>
+          <item>
+           <property name="text">
+            <string>Bitonic (top-down)</string>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="selectHeight">
-           <property name="value">
-            <number>32</number>
+          </item>
+          <item>
+           <property name="text">
+            <string>Odd-even merge (bottom-up)</string>
            </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>1</horstretch>
-         <verstretch>1</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string> </string>
-       </property>
-       <property name="scaledContents">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
+          </item>
+          <item>
+           <property name="text">
+            <string>Odd-even merge (top-down)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Pairwise (bottom-up)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Bose Nelson</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Hibbard</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Balanced</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="sizeLabel">
+          <property name="text">
+           <string>Input size:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="selectSize">
+          <property name="value">
+           <number>8</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="buttonGenerate">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>generate</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="buttonSave">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>save</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="sizeLabel_2">
+          <property name="text">
+           <string>Picture resolution:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="selectWidth">
+          <property name="value">
+           <number>16</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="selectHeight">
+          <property name="value">
+           <number>32</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QLabel" name="showPicture">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>1</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -185,6 +208,9 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSave">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Save</string>
    </property>

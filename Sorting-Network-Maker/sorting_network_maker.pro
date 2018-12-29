@@ -8,7 +8,8 @@ TEMPLATE = app
 
 SOURCES += src/main.cpp \
            src/sorting_network_maker.cpp \
-           src/generators.cpp
+           src/sorting_network_generator.cpp \
+           src/sorting_network_painter.cpp
 
 HEADERS  += src/sorting_network_maker.h \
             src/generators.h
