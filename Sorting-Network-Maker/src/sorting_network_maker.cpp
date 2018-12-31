@@ -3,12 +3,14 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QColorDialog>
+#include <QInputDialog>
 
 #include "sorting_network_maker.h"
+#include "generators.h"
 
 SortingNetworkMaker::SortingNetworkMaker(QWidget *parent)
-    : QMainWindow(parent), generated(false), saved(false),
-    lines(Qt::black), background(Qt::white) {
+    : QMainWindow(parent), lines(Qt::black), background(Qt::white), \
+    resolution(32), generated(false), saved(false) {
     this->ui.setupUi(this);
     connect(this->ui.actionQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
     connect(this->ui.actionAbout, SIGNAL(triggered()), this, SLOT(about()));
@@ -17,6 +19,7 @@ SortingNetworkMaker::SortingNetworkMaker(QWidget *parent)
     connect(this->ui.buttonGenerate, SIGNAL(clicked()), this, SLOT(generate()));
     connect(this->ui.actionLineColor, SIGNAL(triggered()), this, SLOT(selectLineColor()));
     connect(this->ui.actionBackgroundColor, SIGNAL(triggered()), this, SLOT(selectBackgroundColor()));
+    connect(this->ui.actionResolution, SIGNAL(triggered()), this, SLOT(selectResolution()));
 }
 
 void SortingNetworkMaker::save() {
@@ -44,6 +47,15 @@ void SortingNetworkMaker::selectLineColor() {
     }
 }
 
+void SortingNetworkMaker::selectResolution() {
+    bool ok;
+    auto resolution = QInputDialog::getInt(this, tr("Select resolution"), tr("scale"), 
+        this->resolution, 2, 256, 1, &ok);
+    if (ok) {
+        this->resolution = resolution;
+    }
+}
+
 void SortingNetworkMaker::selectBackgroundColor() {
     auto color = QColorDialog::getColor(this->background, this, tr("Select background color"));
     if (color.isValid()) {
@@ -54,20 +66,22 @@ void SortingNetworkMaker::selectBackgroundColor() {
 void SortingNetworkMaker::refresh() {
     auto size = this->ui.scrollArea->size() - QSize(32,32);
     this->ui.showPicture->resize(size);
-    this->ui.showPicture->setPixmap(this->picture.scaled(size, Qt::IgnoreAspectRatio
-        //, Qt::SmoothTransformation
-    ));
+    this->ui.showPicture->setPixmap(this->picture.scaled(size, \
+            Qt::IgnoreAspectRatio, Qt::FastTransformation));
 }
 
-void SortingNetworkMaker::generate() {
+template<typename Builder>
+void SortingNetworkMaker::generateWith() {
     auto n = this->ui.selectSize->value();
-    auto width = this->ui.selectWidth->value();
-    auto height = this->ui.selectHeight->value();
     auto index = this->ui.selectAlgorithm->currentIndex();
-    SortingNetworkPainter builder(n, estimate_columns(index, n), \
+    auto width = this->resolution;
+    auto height = this->resolution;
+    Builder builder(n, estimate_columns(index, n), \
                                   width, height, this->lines, this->background);
     generate_network(index, n, &builder);
     this->picture = builder.picture();
+    this->ui.opValueLabel->setText(QString().setNum(builder.operations()));
+    this->ui.levelValueLabel->setText(QString().setNum(builder.levels()));
     this->ui.actionSave->setEnabled(true);
     this->ui.buttonSave->setEnabled(true);
     this->saved = false;
@@ -75,12 +89,21 @@ void SortingNetworkMaker::generate() {
     this->refresh();
 }
 
+void SortingNetworkMaker::generate() {
+    if(this->ui.actionSplitLevels->isChecked()){
+        this->generateWith<LeveledSortingNetworkPainter>();
+    }
+    else {
+        this->generateWith<SortingNetworkPainter>();
+    }
+}
+
 bool SortingNetworkMaker::askSaveOrContinue() {
     if (this->generated && ! this->saved)  {
         auto button = QMessageBox::question(
             this, 
             tr("Quit"), 
-            tr("Save current file?"),
+            tr("Save figure?"),
             QMessageBox::Save | QMessageBox::No | QMessageBox::Cancel
         );
         if (button == QMessageBox::No) {

@@ -7,7 +7,6 @@
 #include <QCloseEvent>
 #include <QPixmap>
 #include "ui_sorting_network_maker.h"
-#include "generators.h"
 
 class SortingNetworkMaker : public QMainWindow
 {
@@ -22,18 +21,22 @@ public slots:
     void about();
     void selectLineColor();
     void selectBackgroundColor();
+    void selectResolution();
 
 private:
     Ui::SortingNetworkMakerClass ui;
     QPixmap picture;
-    bool generated, saved;
     QColor lines, background;
+    int resolution;
+    bool generated, saved;
 
 protected:
     virtual void closeEvent(QCloseEvent *event);
     bool askSaveOrContinue();
     void errorMessage(const QString &msg);
     void refresh();
+    template<typename Builder>
+    void generateWith();
 };
 
 #endif

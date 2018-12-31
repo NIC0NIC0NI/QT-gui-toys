@@ -23,6 +23,7 @@ namespace bitonic {
             for(int j = 0; j < right; ++j) {
                 builder->addComparator(i + j, i + j + left);
             }
+            builder->addSynchronizer(i, length);
             merge(builder, i, left);
             merge(builder, i + left, right);
         }
@@ -34,15 +35,17 @@ namespace bitonic {
             const int left = length - right;
             split(builder, i, left);
             split(builder, i + left, right);
-            
+            builder->addSynchronizer(i, length);
             for(int j = 0; j < right; ++j) {
                 builder->addComparator(i + j, i + length - j - 1);
             }
+            builder->addSynchronizer(i, length);
             merge(builder, i, left);
             merge(builder, i + left, right);
         }
     }
 }
+
 void generate_bitonic_top_down(SortingNetworkBuilder *builder, int n) {
     bitonic::split(builder, 0, n);
 }
@@ -58,7 +61,7 @@ void generate_bitonic_bottom_up(SortingNetworkBuilder *builder, int n) {
                 builder->addComparator(i + j, i + partner);
             }
         }
-        builder->addLevel();
+        builder->addSynchronizer(0, n);
         for(int d_2 = d_1 - 1; d_2 >= 0; --d_2) {
             const int length_2 = 1 << d_2;
             for(int j = 0; j < length_2; ++j) {
@@ -67,7 +70,7 @@ void generate_bitonic_bottom_up(SortingNetworkBuilder *builder, int n) {
                     builder->addComparator(i + j, i + partner);
                 }
             }
-            builder->addLevel();
+            builder->addSynchronizer(0, n);
         }
     }
 }
@@ -78,6 +81,7 @@ namespace odd_even {
         if (m < length) {
             merge(builder, i, length, m);
             merge(builder, i + r, length - r, m);
+            builder->addSynchronizer(i, length);
             for(int j = i + r; j + r < i + length; j += m) {
                 builder->addComparator(j, j + r);
             }
@@ -115,6 +119,7 @@ namespace odd_even {
             const int left = length - right;
             split(builder, i, left);
             split(builder, i + left, right);
+            builder->addSynchronizer(i, length);
             merge(builder, i, length, 1);
         }
     }
@@ -135,7 +140,7 @@ void generate_odd_even_bottom_up(SortingNetworkBuilder *builder, int n) {
                 builder->addComparator(i + j, i + partner);
             }
         }
-        builder->addLevel();
+        builder->addSynchronizer(0, n);
         for(int d_2 = d_1 - 1; d_2 >= 0; --d_2) {
             const int length_2 = 1 << d_2;
             for(int k = 0; k < length_2; ++k) {
@@ -147,13 +152,13 @@ void generate_odd_even_bottom_up(SortingNetworkBuilder *builder, int n) {
                     }
                 }
             }
-            builder->addLevel();
+            builder->addSynchronizer(0, n);
         }
     }
 }
 
 
-void generate_batcher(SortingNetworkBuilder *builder, int n) {
+void generate_merge_exchange(SortingNetworkBuilder *builder, int n) {
     const int l = ceil_pow_2(n);
     for(int p = 1 << (l - 1); p > 0; p >>= 1) {
         int q = 1 << (l - 1);
@@ -165,6 +170,7 @@ void generate_batcher(SortingNetworkBuilder *builder, int n) {
                     builder->addComparator(i, i + d);
                 }
             }
+            builder->addSynchronizer(0, n);
             d = q - p;
             q >>= 1;
             r = p;
@@ -183,7 +189,7 @@ void generate_pairwise_bottom_up(SortingNetworkBuilder *builder, int n) {
                 builder->addComparator(i + j, i + partner);
             }
         }
-        builder->addLevel();
+        builder->addSynchronizer(0, n);
     }
         
     for(int d_1 = l - 2; d_1 >= 0; --d_1) {
@@ -199,7 +205,7 @@ void generate_pairwise_bottom_up(SortingNetworkBuilder *builder, int n) {
                     }
                 }
             }
-            builder->addLevel();
+            builder->addSynchronizer(0, n);
         }
     }
 }
@@ -233,6 +239,7 @@ namespace bose_nelson {
             const int left = length - right;
             split(builder, i, left);
             split(builder, i + left, right);
+            builder->addSynchronizer(i, length);
             merge(builder, i, left, i + left, right);
         }
     }
@@ -279,10 +286,6 @@ start:
                 if(y & bit) {
                     x &= ~bit;
                     goto start;
-                    /*
-                    generate(builder, n, last_bit, x, y);
-                    return;
-                    */
                 }
                 x |= bit;
                 y |= bit;
@@ -310,6 +313,7 @@ void generate_balanced(SortingNetworkBuilder *builder, int n) {
                     builder->addComparator(i + j, i + curr - j - 1);
                 }
             }
+            builder->addSynchronizer(0, n);
         }
     }
 }
@@ -318,12 +322,15 @@ void generate_balanced(SortingNetworkBuilder *builder, int n) {
 int estimate_bubble(int n, int) {
     return n * 2 + 1;
 }
+
 int estimate_bitonic_and_odd_even(int, int l) {
     return (1 << (l + 1)) + (l - 1) * l / 2 + l;
 }
+
 int estimate_pairwise(int, int l) {
     return (1 << (l - 1)) * l + (l - 1) * l / 2 + l + 4;
 }
+
 int estimate_bose_nelson(int, int l) {
     int x = 3;
     int i;
@@ -348,7 +355,7 @@ static const Generator generators[] = {
     generate_bitonic_top_down,
     generate_odd_even_bottom_up,
     generate_odd_even_top_down,
-    generate_batcher,
+    generate_merge_exchange,
     generate_pairwise_bottom_up,
     generate_bose_nelson,
     generate_hibbard,
@@ -367,7 +374,7 @@ static const Estimator estimators[] = {
     estimate_bitonic_and_odd_even,
     estimate_bitonic_and_odd_even,
     estimate_bitonic_and_odd_even,
-    estimate_bitonic_and_odd_even,
+    estimate_pairwise,
     estimate_pairwise,
     estimate_bose_nelson,
     estimate_bose_nelson,
