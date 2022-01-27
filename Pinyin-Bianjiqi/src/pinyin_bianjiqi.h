@@ -7,7 +7,6 @@
 #include <QTimer>
 
 #include "ui_pinyin_bianjiqi.h"
-#include "cpp17_support.h"
 
 static const int UPDATE_DELAY = 150; // 0.15s
 
@@ -35,13 +34,13 @@ public slots:
 private:
     Ui::PinyinBianjiqiClass ui;
     QTimer updateTimer;
-    utility::optional<QSaveFile> currentFile;
+    QString currentFileName;
 
 protected:
     virtual void closeEvent(QCloseEvent *event);
     bool askSaveOrContinue();
     bool openFileByName(const QString &filename);
-    SaveFileStatus saveTextEditToFile(const QTextEdit &textEdit, QSaveFile *file);
+    SaveFileStatus saveTextEditToFile(const QTextEdit &textEdit, const QString &filename);
     void errorMessage(const QString &msg);
 };
 

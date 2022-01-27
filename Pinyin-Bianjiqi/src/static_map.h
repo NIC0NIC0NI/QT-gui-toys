@@ -2,7 +2,10 @@
 #define STATIC_MAP_H_INCLUDED 1
 
 #include <utility>
+#include <new>
+#include <memory>
 #include <type_traits>
+#include <iterator>
 #include <initializer_list>
 #include <algorithm>
 #include <functional>
@@ -10,13 +13,36 @@
 // use Q_ASSERT instead of assert, to keep consistent with the whole application
 
 #include "common.h"
-#include "cpp17_support.h"
 
-namespace algorithm{  // why does `std::binary_search` return a bool instead of an iterator?
+namespace algorithm {  // why does `std::binary_search` return a bool instead of an iterator?
     template<class ForwardIt, class Key, class Compare = ::std::less<Key>>
     inline ForwardIt binary_search(ForwardIt begin, ForwardIt end, const Key& key, Compare comp) {
         auto it = ::std::lower_bound(begin, end, key, comp);
         return (!(it == end) && !comp(key, *it)) ? it : end;
+    }
+}
+
+namespace memory {  // for pre-c++17 compilers
+    template<class InputIt, class ForwardIt>
+    inline ForwardIt uninitialized_move(InputIt first, InputIt last, ForwardIt d_first) {
+        typedef typename ::std::iterator_traits<ForwardIt>::value_type Value;
+        ForwardIt current = d_first;
+        for (; first != last; ++first, ++current) {
+            ::new (static_cast<void*>(::std::addressof(*current))) Value(std::move(*first));
+        }
+        return current;
+    }
+
+    template<typename Type>
+    inline void destroy_at(Type *p) {
+        p->~Type();
+    }
+
+    template<typename ForwardIt>
+    inline void destroy(ForwardIt first, ForwardIt last) {
+        for (; first != last; ++first) {
+            destroy_at(::std::addressof(*first));
+        }
     }
 }
 

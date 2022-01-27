@@ -71,7 +71,7 @@
      <x>0</x>
      <y>0</y>
      <width>1083</width>
-     <height>17</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -149,7 +149,7 @@
   </action>
   <action name="actionSave">
    <property name="text">
-    <string>Save</string>
+    <string>Save Input</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -157,7 +157,7 @@
   </action>
   <action name="actionSaveAs">
    <property name="text">
-    <string>Save As</string>
+    <string>Save Input As</string>
    </property>
   </action>
   <action name="actionExit">
@@ -240,7 +240,7 @@
   </action>
   <action name="actionSelectAll">
    <property name="text">
-    <string>Select All</string>
+    <string>Select All Input</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>
@@ -251,17 +251,17 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Copy From Generated</string>
+    <string>Copy From Pīnyīn</string>
    </property>
   </action>
   <action name="actionSelectAllOfOutput">
    <property name="text">
-    <string>Select All of Generated</string>
+    <string>Select All of Pīnyīn</string>
    </property>
   </action>
   <action name="actionSaveOutput">
    <property name="text">
-    <string>Save Generated</string>
+    <string>Save Pīnyīn</string>
    </property>
   </action>
   <action name="actionAbout">
