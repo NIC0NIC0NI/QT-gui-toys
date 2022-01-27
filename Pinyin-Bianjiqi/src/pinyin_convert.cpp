@@ -40,11 +40,12 @@ static const container::static_map<QChar, size_t, 14> VOWEL_NUMBER{
 };
 
 inline size_t vowelNumber(QChar c) {
-    return VOWEL_NUMBER.find(c)->value();
+    return VOWEL_NUMBER.lower_bound(c)->value();
 }
 
 inline bool isVowel(QChar c) {
-    return VOWEL_NUMBER.find(c) != VOWEL_NUMBER.end();
+    auto i = VOWEL_NUMBER.lower_bound(c);
+    return (i != VOWEL_NUMBER.end() && i->key() == c);
 }
 
 inline int8_t doubleVowelCombinations(QChar a, QChar b) {
@@ -55,6 +56,14 @@ inline QChar tonedChar(QChar base, QChar tone) {
     return TABLE_1[vowelNumber(base)][tone.digitValue()];
 }
 
+// isVowel(current) && doubleVowelCombinations(last, current) != NONE
+inline bool isDoubleVowelCombinations(QChar last, QChar current) {  
+    auto i = VOWEL_NUMBER.lower_bound(current);
+    if (i != VOWEL_NUMBER.end() && i->key() == current) {
+        return TABLE_2[vowelNumber(last) % 6][i->value() % 6] != NONE;
+    }
+    return false;
+}
 
 
 struct Replace {
@@ -114,7 +123,7 @@ private:
             this->n = 2;
             this->temp[1] = c;
         }
-        else if (isVowel(c) && doubleVowelCombinations(this->temp[0], c) != NONE) {
+        else if (isDoubleVowelCombinations(this->temp[0], c)) {
             this->n = 2;
             this->temp[1] = c;
         }

@@ -14,14 +14,6 @@
 
 #include "common.h"
 
-namespace algorithm {  // why does `std::binary_search` return a bool instead of an iterator?
-    template<class ForwardIt, class Key, class Compare = ::std::less<Key>>
-    inline ForwardIt binary_search(ForwardIt begin, ForwardIt end, const Key& key, Compare comp) {
-        auto it = ::std::lower_bound(begin, end, key, comp);
-        return (!(it == end) && !comp(key, *it)) ? it : end;
-    }
-}
-
 namespace memory {  // for pre-c++17 compilers
     template<class InputIt, class ForwardIt>
     inline ForwardIt uninitialized_move(InputIt first, InputIt last, ForwardIt d_first) {
@@ -113,10 +105,10 @@ namespace container {
         ~static_map() {
             ::memory::destroy(this->begin(), this->end());
         }
-        
+
         template<typename K>
-        const_iterator find(const K & x) const {
-            return ::algorithm::binary_search(this->begin(), this->end(), x, compare());
+        const_iterator lower_bound(const K & x) const {
+            return ::std::lower_bound(this->begin(), this->end(), x, compare());
         }
 
         iterator begin() noexcept {
