@@ -1,4 +1,3 @@
-#include <algorithm>
 #include "generators.h"
 
 inline int ceil_pow_2(int x) {

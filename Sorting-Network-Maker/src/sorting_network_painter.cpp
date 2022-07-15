@@ -1,5 +1,6 @@
-#include <algorithm>
 #include <cmath>
+#include <limits>
+#include <QRandomGenerator>
 #include "generators.h"
 
 inline int line_width(int resolution) {
@@ -11,12 +12,14 @@ SortingNetworkPainter::SortingNetworkPainter(int n, int m, int width, int height
         pic(m * width, n * height), painter(&pic), color(lines), \
         latency(n, 0), l_column(n, 2), holes(n*m, true), \
         ops(0),  n(n), width(width), height(height), \
-        lw_vert(line_width(width)), lw_hori(line_width(height)) {
+        lw_vert(line_width(width)), lw_hori(line_width(height)), test_array(n) {
+    QRandomGenerator gen;
     this->pic.fill(background);
     this->painter.setPen(lines);
     for(int i = 0; i < n; ++i) {
         int y = i * height + (height - lw_hori + 1) / 2;
         this->painter.fillRect(0, y, m * width - 1, lw_hori, lines);
+        this->test_array[i] = gen.bounded(std::numeric_limits<TestData>::max());
     }
 }
 
@@ -30,6 +33,14 @@ bool all_of(Iterator begin, Iterator end) {
     return true;
 }
 
+void SortingNetworkPainter::testCompareAndSwap(int r1, int r2) {
+    auto x = this->test_array[r1], y = this->test_array[r2];
+    TestCompare cmp;
+    if(cmp(y, x)) {
+        this->test_array[r1] = y;
+        this->test_array[r2] = x;
+    }
+}
 
 void SortingNetworkPainter::addComparatorImpl(int r1, int r2) {
     auto begin = this->holes.begin();
@@ -70,6 +81,7 @@ void SortingNetworkPainter::addComparatorImpl(int r1, int r2) {
 
 
 void SortingNetworkPainter::addComparator(int r1, int r2) {
+    this->testCompareAndSwap(r1, r2);
     this->addComparatorImpl(r1, r2);
     this->ops += 1;
     this->latency[r1] = this->latency[r2] = \
@@ -90,4 +102,8 @@ void LeveledSortingNetworkPainter::addSynchronizer(int begin, int width) {
     auto iend = ibegin + width;
     int m = *std::max_element(ibegin, iend);
     std::fill(ibegin, iend, m);
+}
+
+bool SortingNetworkPainter::checkTestResult() const {
+    return std::is_sorted(test_array.begin(), test_array.end(), TestCompare());
 }

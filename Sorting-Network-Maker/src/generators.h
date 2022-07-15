@@ -1,6 +1,7 @@
 #ifndef GENERATORS_H_INCLUDED
 #define GENERATORS_H_INCLUDED 1
 
+#include <algorithm>
 #include <QColor>
 #include <QVector>
 #include <QPixmap>
@@ -15,16 +16,9 @@ public:
 };
 
 class SortingNetworkPainter : public SortingNetworkBuilder {
-protected:
-    QPixmap pic;
-    QPainter painter;
-    QColor color;
-    QVector<int> latency;
-    QVector<int> l_column;
-    QVector<bool> holes;
-    int ops, n, width, height, lw_vert, lw_hori;
-    void addComparatorImpl(int i, int j);
 public:
+    typedef int                 TestData;
+    typedef std::less<TestData> TestCompare;
     SortingNetworkPainter(int n, int m, int width, int height, \
                 const QColor& lines, const QColor& background);
     void addComparator(int i, int j) override;
@@ -32,6 +26,18 @@ public:
     int operations() const { return ops; }
     int levels() const;
     QPixmap picture() const;
+    bool checkTestResult() const;
+protected:
+    QPixmap pic;
+    QPainter painter;
+    QColor color;
+    QVector<int> latency;
+    QVector<int> l_column;
+    QVector<bool> holes;
+    QVector<TestData> test_array;
+    int ops, n, width, height, lw_vert, lw_hori;
+    void addComparatorImpl(int i, int j);
+    void testCompareAndSwap(int i, int j);
 };
 
 class LeveledSortingNetworkPainter : public SortingNetworkPainter {

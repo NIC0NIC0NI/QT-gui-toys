@@ -87,6 +87,9 @@ void SortingNetworkMaker::generateWith() {
     this->saved = false;
     this->generated = true;
     this->refresh();
+    if(!builder.checkTestResult()) {
+        QMessageBox::warning(this, tr("Warning"), tr("This network fails the test."));
+    }
 }
 
 void SortingNetworkMaker::generate() {
