@@ -15,6 +15,14 @@ void generate_bubble(SortingNetworkBuilder *builder, int n) {
     }
 }
 
+void generate_transposition(SortingNetworkBuilder *builder, int n) {
+    for(int i = 0; i < n; ++i) {
+        for(int j = i & 1; j < n - 1; j += 2) {
+            builder->addComparator(j, j + 1);
+        }
+    }
+}
+
 namespace comb_3smooth {
     static const int list[] = {1, 2, 3, 4, 6, 8, 9, 12, 16, 18, 24, 27, 32, \
         36, 48, 54, 64, 72, 81, 96, 108, 128, 144, 162, 192, 216, 243, 256, \
@@ -378,6 +386,10 @@ int estimate_bubble(int n, int) {
     return n * 2 + 1;
 }
 
+int estimate_transpostion(int n, int) {
+    return n + 4;
+}
+
 int estimate_3smooth_comb(int n, int) {
     if(n > 1000) return -1;
     return n * comb_3smooth::find(n);
@@ -412,6 +424,7 @@ typedef void (*Generator)(SortingNetworkBuilder *builder, int n);
 
 static const Generator generators[] = {
     generate_bubble,
+    generate_transposition,
     generate_3smooth_comb,
     generate_bitonic,
     generate_odd_even,
@@ -431,6 +444,7 @@ typedef int (*Estimator)(int n, int l);
 
 static const Estimator estimators[] = {
     estimate_bubble,
+    estimate_transpostion,
     estimate_3smooth_comb,
     estimate_bitonic_and_odd_even,
     estimate_bitonic_and_odd_even,

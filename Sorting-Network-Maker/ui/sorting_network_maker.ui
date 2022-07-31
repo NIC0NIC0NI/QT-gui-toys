@@ -65,6 +65,11 @@
           </item>
           <item>
            <property name="text">
+            <string>Odd-even Transposition</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>Comb (3-smooth)</string>
            </property>
           </item>
