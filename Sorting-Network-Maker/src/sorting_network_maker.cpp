@@ -76,19 +76,26 @@ void SortingNetworkMaker::generateWith() {
     auto index = this->ui.selectAlgorithm->currentIndex();
     auto width = this->resolution;
     auto height = this->resolution;
-    Builder builder(n, estimate_columns(index, n), \
-                                  width, height, this->lines, this->background);
-    generate_network(index, n, &builder);
-    this->picture = builder.picture();
-    this->ui.opValueLabel->setText(QString().setNum(builder.operations()));
-    this->ui.levelValueLabel->setText(QString().setNum(builder.levels()));
-    this->ui.actionSave->setEnabled(true);
-    this->ui.buttonSave->setEnabled(true);
-    this->saved = false;
-    this->generated = true;
-    this->refresh();
-    if(!builder.checkTestResult()) {
-        QMessageBox::warning(this, tr("Warning"), tr("This network fails the test."));
+    auto est = estimate_columns(index, n);
+    if(est < 0) {
+        QMessageBox::warning(this, tr("Warning"), tr("The size is not supported."));
+    } else {
+        Builder builder(n, estimate_columns(index, n), \
+                        width, height, this->lines, this->background, \
+                        this->ui.actionShowTestExample->isChecked(), \
+                        this->ui.actionReproducibleRandom->isChecked());
+        generate_network(index, n, &builder);
+        this->picture = builder.picture();
+        this->ui.opValueLabel->setText(QString().setNum(builder.operations()));
+        this->ui.latencyValueLabel->setText(QString().setNum(builder.levels()));
+        this->ui.actionSave->setEnabled(true);
+        this->ui.buttonSave->setEnabled(true);
+        this->saved = false;
+        this->generated = true;
+        this->refresh();
+        if(!builder.checkTestResult()) {
+            QMessageBox::warning(this, tr("Warning"), tr("This network fails the test."));
+        }
     }
 }
 

@@ -1,25 +1,63 @@
+#include <QRandomGenerator>
 #include <cmath>
 #include <limits>
-#include <QRandomGenerator>
 #include "generators.h"
 
 inline int line_width(int resolution) {
     return std::max(1, resolution / 18);
 }
 
+void SortingNetworkPainter::showTestExample(int x) {
+    this->painter.eraseRect(x, 0, width, n * height);
+    for(int i = 0; i < n; ++i) {
+        int y = i * height;
+        this->painter.drawText(x, y, width, height, Qt::AlignCenter, QString().setNum(this->test_array[i]));
+    }
+}
+
+namespace random {
+
+struct Undeterminated {
+    int operator()(int i) const {
+        return QRandomGenerator::global()->bounded(i);
+    }
+};
+
+struct Reproducible {
+    QRandomGenerator gen;
+    Reproducible() : gen(123456789u) {}
+    int operator()(int i) {
+        return gen.bounded(i);
+    }
+};
+
+}
+
 SortingNetworkPainter::SortingNetworkPainter(int n, int m, int width, int height,\
-                                            const QColor& lines, const QColor& background): \
+                                            const QColor& lines, const QColor& background, \
+                                            bool show_test, bool reproducible_test): \
         pic(m * width, n * height), painter(&pic), color(lines), \
         latency(n, 0), l_column(n, 2), holes(n*m, true), \
-        ops(0),  n(n), width(width), height(height), \
+        ops(0),  n(n), width(width), height(height), show_test_example(show_test), \
         lw_vert(line_width(width)), lw_hori(line_width(height)), test_array(n) {
-    QRandomGenerator gen;
     this->pic.fill(background);
     this->painter.setPen(lines);
+    int left = show_test ? width : 0, right = m * width - 1;
     for(int i = 0; i < n; ++i) {
         int y = i * height + (height - lw_hori + 1) / 2;
-        this->painter.fillRect(0, y, m * width - 1, lw_hori, lines);
-        this->test_array[i] = gen.bounded(std::numeric_limits<TestData>::max());
+        this->painter.fillRect(left, y, right, lw_hori, lines);
+        this->test_array[i] = i;
+    }
+    if(reproducible_test) {
+        std::random_shuffle(this->test_array.begin(), this->test_array.end(), random::Reproducible());
+    } else {
+        std::random_shuffle(this->test_array.begin(), this->test_array.end(), random::Undeterminated());
+    }
+    if(show_test) {
+        auto font = this->painter.font();
+        font.setPixelSize(height * 2 / 3);
+        this->painter.setFont(font);
+        showTestExample(0);
     }
 }
 
@@ -88,9 +126,12 @@ void SortingNetworkPainter::addComparator(int r1, int r2) {
                 std::max(this->latency[r1],this->latency[r2]) + 1;
 }
 
-QPixmap SortingNetworkPainter::picture() const { 
-    return pic.copy(0, 0, (*std::max_element(this->l_column.cbegin(), \
-                this->l_column.cend()) + 2) * width, this->n * height); 
+QPixmap SortingNetworkPainter::picture() { 
+    int xwidth = *std::max_element(this->l_column.cbegin(), this->l_column.cend()) * width;
+    if(show_test_example) {
+        showTestExample(xwidth + width);
+    }
+    return pic.copy(0, 0, xwidth + (width << 1), this->n * height); 
 }
 
 int SortingNetworkPainter::levels() const {

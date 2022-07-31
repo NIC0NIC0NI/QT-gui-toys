@@ -65,22 +65,17 @@
           </item>
           <item>
            <property name="text">
-            <string>Bitonic (bottom-up)</string>
+            <string>Comb (3-smooth)</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Bitonic (top-down)</string>
+            <string>Bitonic</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Odd-even merge (bottom-up)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Odd-even merge (top-down)</string>
+            <string>Odd-even merge</string>
            </property>
           </item>
           <item>
@@ -90,7 +85,7 @@
           </item>
           <item>
            <property name="text">
-            <string>Pairwise (bottom-up)</string>
+            <string>Pairwise</string>
            </property>
           </item>
           <item>
@@ -105,7 +100,12 @@
           </item>
           <item>
            <property name="text">
-            <string>Balanced</string>
+            <string>Optimal Size</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Optimal Latency</string>
            </property>
           </item>
          </widget>
@@ -208,14 +208,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="levelNameLabel">
+         <widget class="QLabel" name="latencyNameLabel">
           <property name="text">
-           <string>Levels:</string>
+           <string>Latency:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="levelValueLabel">
+         <widget class="QLabel" name="latencyValueLabel">
           <property name="text">
            <string/>
           </property>
@@ -314,6 +314,8 @@
     <addaction name="actionResolution"/>
     <addaction name="separator"/>
     <addaction name="actionSplitLevels"/>
+    <addaction name="actionShowTestExample"/>
+    <addaction name="actionReproducibleRandom"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAppearance"/>
@@ -373,6 +375,28 @@
    </property>
    <property name="text">
     <string>Split Levels</string>
+   </property>
+  </action>
+  <action name="actionShowTestExample">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Test Example</string>
+   </property>
+  </action>
+  <action name="actionReproducibleRandom">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Reproducible Randomness</string>
    </property>
   </action>
   <action name="actionResolution">
