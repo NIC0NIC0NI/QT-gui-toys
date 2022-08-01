@@ -25,7 +25,7 @@ public:
     void addSynchronizer(int, int) override {}
     int operations() const { return ops; }
     int levels() const;
-    QPixmap picture();
+    QPixmap finishPicture();
     bool checkTestResult() const;
 protected:
     QPixmap pic;

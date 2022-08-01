@@ -320,6 +320,7 @@
     <addaction name="separator"/>
     <addaction name="actionSplitLevels"/>
     <addaction name="actionShowTestExample"/>
+    <addaction name="actionKeepAspectRatio"/>
     <addaction name="actionReproducibleRandom"/>
    </widget>
    <addaction name="menuFile"/>
@@ -391,6 +392,17 @@
    </property>
    <property name="text">
     <string>Show Test Example</string>
+   </property>
+  </action>
+  <action name="actionKeepAspectRatio">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Keep Aspect Ratio</string>
    </property>
   </action>
   <action name="actionReproducibleRandom">

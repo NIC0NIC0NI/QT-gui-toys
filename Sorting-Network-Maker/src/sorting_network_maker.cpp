@@ -1,4 +1,6 @@
 #include <cstddef>
+#include <exception>
+#include <QException>
 #include <QSize>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -64,10 +66,12 @@ void SortingNetworkMaker::selectBackgroundColor() {
 }
 
 void SortingNetworkMaker::refresh() {
-    auto size = this->ui.scrollArea->size() - QSize(32,32);
+    auto size = this->ui.scrollArea->size() - QSize(50,50);
+    auto keepAspectRatio = this->ui.actionKeepAspectRatio->isChecked();
+    auto aspectRatio = keepAspectRatio ? Qt::KeepAspectRatioByExpanding : Qt::IgnoreAspectRatio;
+    this->ui.scrollArea->setHorizontalScrollBarPolicy(keepAspectRatio ? Qt::ScrollBarAlwaysOn : Qt::ScrollBarAsNeeded);
     this->ui.showPicture->resize(size);
-    this->ui.showPicture->setPixmap(this->picture.scaled(size, \
-            Qt::IgnoreAspectRatio, Qt::FastTransformation));
+    this->ui.showPicture->setPixmap(this->picture.scaled(size, aspectRatio, Qt::SmoothTransformation));
 }
 
 template<typename Builder>
@@ -80,18 +84,17 @@ void SortingNetworkMaker::generateWith() {
     if(est < 0) {
         QMessageBox::warning(this, tr("Warning"), tr("The size is not supported."));
     } else {
-        Builder builder(n, estimate_columns(index, n), \
-                        width, height, this->lines, this->background, \
+        Builder builder(n, est, width, height, this->lines, this->background, \
                         this->ui.actionShowTestExample->isChecked(), \
                         this->ui.actionReproducibleRandom->isChecked());
         generate_network(index, n, &builder);
-        this->picture = builder.picture();
         this->ui.opValueLabel->setText(QString().setNum(builder.operations()));
         this->ui.latencyValueLabel->setText(QString().setNum(builder.levels()));
         this->ui.actionSave->setEnabled(true);
         this->ui.buttonSave->setEnabled(true);
         this->saved = false;
         this->generated = true;
+        this->picture = builder.finishPicture();
         this->refresh();
         if(!builder.checkTestResult()) {
             QMessageBox::warning(this, tr("Warning"), tr("This network fails the test."));

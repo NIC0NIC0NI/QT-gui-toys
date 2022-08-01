@@ -1,6 +1,7 @@
-#include <QRandomGenerator>
 #include <cmath>
 #include <limits>
+#include <QRandomGenerator>
+#include <fstream>
 #include "generators.h"
 
 inline int line_width(int resolution) {
@@ -8,10 +9,12 @@ inline int line_width(int resolution) {
 }
 
 void SortingNetworkPainter::showTestExample(int x) {
-    this->painter.eraseRect(x, 0, width, n * height);
+    auto width_125 = width + (width >> 2);
+    this->painter.eraseRect(x, 0, width_125, n * height);
     for(int i = 0; i < n; ++i) {
         int y = i * height;
-        this->painter.drawText(x, y, width, height, Qt::AlignCenter, QString().setNum(this->test_array[i]));
+        this->painter.drawText(x, y, width_125, height, \
+            Qt::AlignCenter, QString().setNum(this->test_array.at(i)));
     }
 }
 
@@ -46,7 +49,7 @@ SortingNetworkPainter::SortingNetworkPainter(int n, int m, int width, int height
     for(int i = 0; i < n; ++i) {
         int y = i * height + (height - lw_hori + 1) / 2;
         this->painter.fillRect(left, y, right, lw_hori, lines);
-        this->test_array[i] = i;
+        this->test_array.replace(i, i);
     }
     if(reproducible_test) {
         std::random_shuffle(this->test_array.begin(), this->test_array.end(), random::Reproducible());
@@ -72,17 +75,17 @@ bool all_of(Iterator begin, Iterator end) {
 }
 
 void SortingNetworkPainter::testCompareAndSwap(int r1, int r2) {
-    auto x = this->test_array[r1], y = this->test_array[r2];
+    auto x = this->test_array.at(r1), y = this->test_array.at(r2);
     TestCompare cmp;
     if(cmp(y, x)) {
-        this->test_array[r1] = y;
-        this->test_array[r2] = x;
+        this->test_array.replace(r1, y);
+        this->test_array.replace(r2, x);
     }
 }
 
 void SortingNetworkPainter::addComparatorImpl(int r1, int r2) {
     auto begin = this->holes.begin();
-    int first = std::max(this->l_column[r1], this->l_column[r2]);
+    int first = std::max(this->l_column.at(r1), this->l_column.at(r2));
     for(int c = first; ; ++c) {
         auto i1 = begin + c * this->n + r1;
         auto i2 = begin + c * this->n + r2 + 1;
@@ -109,9 +112,8 @@ void SortingNetworkPainter::addComparatorImpl(int r1, int r2) {
                 }
             }
             std::fill(i1, i2, false);
-
-            this->l_column[r1] = this->l_column[r2] = c + 1;
-
+            this->l_column.replace(r1, c + 1);
+            this->l_column.replace(r2, c + 1);
             return;
         }
     }
@@ -122,16 +124,19 @@ void SortingNetworkPainter::addComparator(int r1, int r2) {
     this->testCompareAndSwap(r1, r2);
     this->addComparatorImpl(r1, r2);
     this->ops += 1;
-    this->latency[r1] = this->latency[r2] = \
-                std::max(this->latency[r1],this->latency[r2]) + 1;
+    auto new_value = std::max(this->latency.at(r1),this->latency.at(r2)) + 1;
+    this->latency.replace(r1, new_value);
+    this->latency.replace(r2, new_value);
 }
 
-QPixmap SortingNetworkPainter::picture() { 
+QPixmap SortingNetworkPainter::finishPicture() { 
     int xwidth = *std::max_element(this->l_column.cbegin(), this->l_column.cend()) * width;
     if(show_test_example) {
-        showTestExample(xwidth + width);
+        showTestExample(xwidth + ((3 * width) >> 2));
     }
-    return pic.copy(0, 0, xwidth + (width << 1), this->n * height); 
+    this->painter.end();
+    pic = pic.copy(0, 0, xwidth + (width << 1), this->n * height);
+    return pic;
 }
 
 int SortingNetworkPainter::levels() const {

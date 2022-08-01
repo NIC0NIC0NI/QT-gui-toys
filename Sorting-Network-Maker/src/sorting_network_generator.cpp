@@ -25,8 +25,7 @@ void generate_transposition(SortingNetworkBuilder *builder, int n) {
 
 namespace comb_3smooth {
     static const int list[] = {1, 2, 3, 4, 6, 8, 9, 12, 16, 18, 24, 27, 32, \
-        36, 48, 54, 64, 72, 81, 96, 108, 128, 144, 162, 192, 216, 243, 256, \
-        288, 324, 384, 432, 486, 512, 576, 648, 729, 768, 864, 972};
+        36, 48, 54, 64, 72, 81, 96, 108, 128};
 
     static int find(int n) {
         auto b = std::begin(list), e = std::end(list);
@@ -265,83 +264,95 @@ static void build_given(SortingNetworkBuilder *builder, int n, const int (*comp)
     }
 }
 
-namespace optimal {
-    int network6[][2] = {{0,1},{2,3},{4,5},{0,2},{3,5},{1,4},{0,1},{2,3},{4,5},{1,2},{3,4},{2,3}};
-    int synchronizers6[] = {3,6,9,11,12};
+namespace optimal6 {
+    static const int comp[][2] = {{0,1},{2,3},{4,5},{0,2},{3,5},{1,4},{0,1},{2,3},{4,5},{1,2},{3,4},{2,3}};
+    static const int sync[] = {3,6,9,11,12};
+}
 
-    int network9s[][2] = {{0,1},{3,4},{6,7},{1,2},{4,5},{7,8},{0,1},{3,4},{6,7},{2,5},\
-                         {1,4},{0,3},{5,8},{2,5},{3,6},{4,7},{0,3},{1,4},{5,7},{2,6},{1,3},{2,4},{5,6},{2,3},{4,5}};
-    int synchronizers9s[] = {3,6,10,13,16,20,23,25};
+namespace optimal9 {
+    static const int comp_s[][2] = {
+        {0,1},{3,4},{6,7},{1,2},{4,5},{7,8},{0,1},{3,4},{6,7},{2,5},{1,4},{0,3},{5,8},{2,5},{3,6},{4,7},\
+        {0,3},{1,4},{5,7},{2,6},{1,3},{2,4},{5,6},{2,3},{4,5}};
+    static const int sync_s[] = {3,6,10,13,16,20,23,25};
+}
 
-    int network10s[][2] = {{0,5},{1,6},{2,7},{3,8},{4,9},{0,3},{1,4},{5,8},{6,9},{0,2},{3,6},{7,9},\
-                          {0,1},{2,4},{5,7},{8,9},{1,2},{3,5},{4,6},{7,8},{1,3},{2,5},{4,7},{6,8},\
-                          {2,3},{6,7},{3,4},{5,6},{4,5}};
-    int synchronizers10s[] = {5,9,12,16,20,24,26,28,29};
-    int network10l[][2] = {{0,9},{1,2},{3,4},{5,6},{7,8},{1,8},{0,2},{3,5},{4,6},{7,9},{0,1},{2,6},{3,7},{4,5},{8,9},\
-                           {0,3},{6,9},{1,5},{4,8},{2,7},{1,2},{3,4},{5,6},{7,8},{1,3},{2,4},{5,7},{6,8},{2,3},{4,5},{6,7}};
-    int synchronizers10l[] = {5,10,15,20,24,28,31};
+namespace optimal10 {
+    static const int comp_s[][2] = {
+        {0,5},{1,6},{2,7},{3,8},{4,9},{0,3},{1,4},{5,8},{6,9},{0,2},{3,6},{7,9},{0,1},{2,4},{5,7},{8,9},\
+        {1,2},{3,5},{4,6},{7,8},{1,3},{2,5},{4,7},{6,8},{2,3},{6,7},{3,4},{5,6},{4,5}};
+    static const int sync_s[] = {5,9,12,16,20,24,26,28,29};
+    static const int comp_l[][2] = {
+        {0,9},{1,2},{3,4},{5,6},{7,8},{1,8},{0,2},{3,5},{4,6},{7,9},{0,1},{2,6},{3,7},{4,5},{8,9},{0,3},\
+        {6,9},{1,5},{4,8},{2,7},{1,2},{3,4},{5,6},{7,8},{1,3},{2,4},{5,7},{6,8},{2,3},{4,5},{6,7}};
+    static const int sync_l[] = {5,10,15,20,24,28,31};
+}
 
-    int network12c[][2] = {{0,1},{2,3},{4,5},{6,7},{8,9},{10,11},{0,2},{1,3},{4,6},{5,7},{8,10},{9,11}};
-    int synchronizers12c[] = {6,12};
-    int network12s[][2] = {{1,2},{5,6},{9,10},{0,4},{7,11},{1,5},{6,10},{3,7},{4,8},\
-                          {2,6},{5,9},{0,4},{7,11},{3,8},{1,5},{6,10},{1,4},{7,10},{2,3},{8,9},\
-                          {2,4},{7,9},{3,5},{6,8},{3,4},{5,6},{7,8}};
-    int synchronizers12s[] = {5,9,14,16,20,24,27};
-    int network12l[][2] = {{2,6},{1,5},{0,4},{9,10},{7,11},{1,2},{6,10},{5,9},{4,8},\
-                          {3,7},{2,6},{1,5},{0,4},{9,10},{7,11},{3,8},{1,4},{2,3},{5,6},{7,10},{8,9},\
-                          {3,5},{2,4},{6,8},{7,9},{3,4},{5,6},{7,8}};
-    int synchronizers12l[] = {5,10,16,21,25,28};
+namespace optimal12 {
+    static const int comp_c[][2] = {{0,1},{2,3},{4,5},{6,7},{8,9},{10,11},{0,2},{1,3},{4,6},{5,7},{8,10},{9,11}};
+    static const int sync_c[] = {6,12};
+    static const int comp_s[][2] = {
+        {1,2},{5,6},{9,10},{0,4},{7,11},{1,5},{6,10},{3,7},{4,8},{2,6},{5,9},{0,4},{7,11},{3,8},{1,5},{6,10},\
+        {1,4},{7,10},{2,3},{8,9},{2,4},{7,9},{3,5},{6,8},{3,4},{5,6},{7,8}};
+    static const int sync_s[] = {5,9,14,16,20,24,27};
+    static const int comp_l[][2] = {
+        {2,6},{1,5},{0,4},{9,10},{7,11},{1,2},{6,10},{5,9},{4,8},{3,7},{2,6},{1,5},{0,4},{9,10},{7,11},{3,8},\
+        {1,4},{2,3},{5,6},{7,10},{8,9},{3,5},{2,4},{6,8},{7,9},{3,4},{5,6},{7,8}};
+    static const int sync_l[] = {5,10,16,21,25,28};
+}
 
-    int network13s[][2] = {{0,12},{1,10},{2,11},{3,6},{4,7},{8,9},{0,1},{2,8},{3,4},{6,7},{9,11},{10,12},\
-                          {0,3},{1,4},{5,11},{6,10},{7,12},{4,9},{5,10},{7,8},{11,12},{2,5},{3,7},{4,6},\
-                          {8,10},{9,11},{0,2},{3,4},{1,5},{8,9},{10,11},{1,2},{5,7},{6,8},{1,3},{2,4},\
-                          {5,6},{7,8},{9,10},{2,3},{4,5},{6,7},{8,9},{3,4},{5,6}};
-    int synchronizers13s[] = {6, 12, 17, 21, 26, 31, 34, 39, 43, 45};
-    
-    int network16c[][2] = {{0,1},{2,3},{4,5},{6,7},{8,9},{10,11},{12,13},{14,15},\
-                          {0,2},{1,3},{4,6},{5,7},{8,10},{9,11},{12,14},{13,15},\
-                          {0,4},{1,5},{2,6},{3,7},{8,12},{9,13},{10,14},{11,15},\
-                          {0,8},{1,9},{2,10},{3,11},{4,12},{5,13},{6,14},{7,15},\
-                          {1,2},{13,14},{3,12},{4,8},{7,11},{5,10},{6,9}};
-    int synchronizers16c[] = {8,16,24,32,39};
-    int network16s[][2] = {{1,4},{7,13},{2,8},{11,14},{2,4},{5,6},{9,10},{11,13},{3,8},{7,12},\
-                          {3,5},{6,8},{7,9},{10,12},{3,4},{5,6},{7,8},{9,10},{11,12},{6,7},{8,9}};
-    int synchronizers16s[] = {4,10,14,19,21};
-    int network16l[][2] = {{1,4},{2,8},{3,10},{5,9},{6,12},{7,13},{11,14},{2,4},{3,5},{6,8},{7,9},{10,12},{11,13},\
-                          {3,6},{5,8},{7,10},{9,12},{3,4},{5,6},{7,8},{9,10},{11,12}};
-    int synchronizers16l[] = {7,13,17,22};
+namespace optimal13 {
+    static const int comp_s[][2] = {
+        {0,12},{1,10},{2,11},{3,6},{4,7},{8,9},{0,1},{2,8},{3,4},{6,7},{9,11},{10,12},{0,3},{1,4},{5,11},\
+        {6,10},{7,12},{4,9},{5,10},{7,8},{11,12},{2,5},{3,7},{4,6},{8,10},{9,11},{0,2},{3,4},{1,5},{8,9},\
+        {10,11},{1,2},{5,7},{6,8},{1,3},{2,4},{5,6},{7,8},{9,10},{2,3},{4,5},{6,7},{8,9},{3,4},{5,6}};
+    static const int sync_s[] = {6, 12, 17, 21, 26, 31, 34, 39, 43, 45};
+}
+
+namespace optimal16 {
+    static const int comp_c[][2] = {
+        {0,1},{2,3},{4,5},{6,7},{8,9},{10,11},{12,13},{14,15},{0,2},{1,3},{4,6},{5,7},{8,10},{9,11},{12,14},{13,15},\
+        {0,4},{1,5},{2,6},{3,7},{8,12},{9,13},{10,14},{11,15},{0,8},{1,9},{2,10},{3,11},{4,12},{5,13},{6,14},{7,15},\
+        {1,2},{13,14},{3,12},{4,8},{7,11},{5,10},{6,9}};
+    static const int sync_c[] = {8,16,24,32,39};
+    static const int comp_s[][2] = {
+        {1,4},{7,13},{2,8},{11,14},{2,4},{5,6},{9,10},{11,13},{3,8},{7,12},{3,5},{6,8},{7,9},{10,12},{3,4},\
+        {5,6},{7,8},{9,10},{11,12},{6,7},{8,9}};
+    static const int sync_s[] = {4,10,14,19,21};
+    static const int comp_l[][2] = {
+        {1,4},{2,8},{3,10},{5,9},{6,12},{7,13},{11,14},{2,4},{3,5},{6,8},{7,9},{10,12},{11,13},{3,6},{5,8},\
+        {7,10},{9,12},{3,4},{5,6},{7,8},{9,10},{11,12}};
+    static const int sync_l[] = {7,13,17,22};
 }
 
 template<typename T, int N>
 inline constexpr int array_size(T (&)[N]) { return N; }
 
 void generate_optimal_size(SortingNetworkBuilder *builder, int n) {
-    using namespace optimal;
     switch (n) {
     case 6:
-        build_given(builder, 6, network6, array_size(synchronizers6), synchronizers6);
+        build_given(builder, 6, optimal6::comp, array_size(optimal6::sync), optimal6::sync);
         break;
     case 9:
-        build_given(builder, 9, network9s, array_size(synchronizers9s), synchronizers9s);
+        build_given(builder, 9, optimal9::comp_s, array_size(optimal9::sync_s), optimal9::sync_s);
         break;
     case 10:
-        build_given(builder, 10, network10s, array_size(synchronizers10s), synchronizers10s);
+        build_given(builder, 10, optimal10::comp_s, array_size(optimal10::sync_s), optimal10::sync_s);
         break;
     case 11:
     case 12:
-        build_given(builder, n, network12c, array_size(synchronizers12c), synchronizers12c);
+        build_given(builder, n, optimal12::comp_c, array_size(optimal12::sync_c), optimal12::sync_c);
         builder->addSynchronizer(0, n);
-        build_given(builder, n, network12s, array_size(synchronizers12s), synchronizers12s);
+        build_given(builder, n, optimal12::comp_s, array_size(optimal12::sync_s), optimal12::sync_s);
         break;
     case 13:
-        build_given(builder, 13, network13s, array_size(synchronizers13s), synchronizers13s);
+        build_given(builder, 13, optimal13::comp_s, array_size(optimal13::sync_s), optimal13::sync_s);
         break;
     case 14:
     case 15:
     case 16:
-        build_given(builder, n, network16c, array_size(synchronizers16c), synchronizers16c);
+        build_given(builder, n, optimal16::comp_c, array_size(optimal16::sync_c), optimal16::sync_c);
         builder->addSynchronizer(0, n);
-        build_given(builder, n, network16s, array_size(synchronizers16s), synchronizers16s);
+        build_given(builder, n, optimal16::comp_s, array_size(optimal16::sync_s), optimal16::sync_s);
         break;
     
     default:
@@ -351,28 +362,27 @@ void generate_optimal_size(SortingNetworkBuilder *builder, int n) {
 }
 
 void generate_optimal_latency(SortingNetworkBuilder *builder, int n) {
-    using namespace optimal;
     switch (n) {
     case 6:
-        build_given(builder, 6, network6, array_size(synchronizers6), synchronizers6);
+        build_given(builder, 6, optimal6::comp, array_size(optimal6::sync), optimal6::sync);
         break;
     case 9:
     case 10:
-        build_given(builder, n, network10l, array_size(synchronizers10l), synchronizers10l);
+        build_given(builder, n, optimal10::comp_l, array_size(optimal10::sync_l), optimal10::sync_l);
         break;
     case 11:
     case 12:
-        build_given(builder, n, network12c, array_size(synchronizers12c), synchronizers12c);
+        build_given(builder, n, optimal12::comp_c, array_size(optimal12::sync_c), optimal12::sync_c);
         builder->addSynchronizer(0, n);
-        build_given(builder, n, network12l, array_size(synchronizers12l), synchronizers12l);
+        build_given(builder, n, optimal12::comp_l, array_size(optimal12::sync_l), optimal12::sync_l);
         break;
     case 13:
     case 14:
     case 15:
     case 16:
-        build_given(builder, n, network16c, array_size(synchronizers16c), synchronizers16c);
+        build_given(builder, n, optimal16::comp_c, array_size(optimal16::sync_c), optimal16::sync_c);
         builder->addSynchronizer(0, n);
-        build_given(builder, n, network16l, array_size(synchronizers16l), synchronizers16l);
+        build_given(builder, n, optimal16::comp_l, array_size(optimal16::sync_l), optimal16::sync_l);
         break;
     
     default:
@@ -391,7 +401,6 @@ int estimate_transpostion(int n, int) {
 }
 
 int estimate_3smooth_comb(int n, int) {
-    if(n > 1000) return -1;
     return n * comb_3smooth::find(n);
 }
 
