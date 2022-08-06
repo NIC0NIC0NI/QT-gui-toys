@@ -9,10 +9,12 @@ TEMPLATE = app
 SOURCES += src/main.cpp \
            src/sorting_network_maker.cpp \
            src/sorting_network_generator.cpp \
-           src/sorting_network_painter.cpp
+           src/sorting_network_painter.cpp \
+           src/sorting_network_tester.cpp
 
 HEADERS  += src/sorting_network_maker.h \
-            src/generators.h
+            src/generators.h \
+            src/tester.h
 
 FORMS    += ui/sorting_network_maker.ui
 

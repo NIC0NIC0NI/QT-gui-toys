@@ -1,12 +1,6 @@
 #include <iterator>
 #include "generators.h"
 
-inline int ceil_pow_2(int x) {
-    int i;
-    for(i = 0; (1 << i) < x; ++i);
-    return i;
-}
-
 void generate_bubble(SortingNetworkBuilder *builder, int n) {
     for(int i = n - 1; i > 0; -- i) {
         for(int j = 0; j < i; ++j) {

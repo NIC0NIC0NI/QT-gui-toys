@@ -1,11 +1,14 @@
 #ifndef SORTING_NETWORK_MAKER_H_INCLUDED
 #define SORTING_NETWORK_MAKER_H_INCLUDED 1
 
-#include <QString>
+#include <QFlags>
 #include <QColor>
-#include <QMainWindow>
-#include <QCloseEvent>
+#include <QFont>
+#include <QString>
 #include <QPixmap>
+#include <QCloseEvent>
+#include <QDialog>
+#include <QMainWindow>
 #include "ui_sorting_network_maker.h"
 
 class SortingNetworkMaker : public QMainWindow
@@ -22,21 +25,24 @@ public slots:
     void selectLineColor();
     void selectBackgroundColor();
     void selectResolution();
+    void selectExampleFont();
+    void selectStabilityTestType();
 
 private:
     Ui::SortingNetworkMakerClass ui;
     QPixmap picture;
     QColor lines, background;
+    QFont exampleFont;
     int resolution;
+    int equalElements;
     bool generated, saved;
 
 protected:
     virtual void closeEvent(QCloseEvent *event);
     bool askSaveOrContinue();
-    void errorMessage(const QString &msg);
     void refresh();
     template<typename Builder>
-    void generateWith();
+    void generateWith(int n, int index, int col_est);
 };
 
 #endif

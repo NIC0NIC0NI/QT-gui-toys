@@ -1,11 +1,11 @@
 #ifndef GENERATORS_H_INCLUDED
 #define GENERATORS_H_INCLUDED 1
 
-#include <algorithm>
 #include <QColor>
 #include <QVector>
 #include <QPixmap>
 #include <QPainter>
+#include "tester.h"
 
 class SortingNetworkBuilder {
 public:
@@ -15,18 +15,10 @@ public:
     virtual ~SortingNetworkBuilder() {}
 };
 
+void generate_network(int index, int n, SortingNetworkBuilder *builder);
+int estimate_columns(int index, int n);
+
 class SortingNetworkPainter : public SortingNetworkBuilder {
-public:
-    typedef int                 TestData;
-    typedef std::less<TestData> TestCompare;
-    SortingNetworkPainter(int n, int m, int width, int height, \
-                const QColor& lines, const QColor& background, bool show_test, bool reproducible_random);
-    void addComparator(int i, int j) override;
-    void addSynchronizer(int, int) override {}
-    int operations() const { return ops; }
-    int levels() const;
-    QPixmap finishPicture();
-    bool checkTestResult() const;
 protected:
     QPixmap pic;
     QPainter painter;
@@ -34,23 +26,52 @@ protected:
     QVector<int> latency;
     QVector<int> l_column;
     QVector<bool> holes;
-    QVector<TestData> test_array;
     int ops, n, width, height, lw_vert, lw_hori;
-    bool show_test_example;
-    void showTestExample(int x);
-    void addComparatorImpl(int i, int j);
-    void testCompareAndSwap(int i, int j);
+    void drawComparator(int i, int j);
+    int pictureWidth() const;
+    QPixmap finishPicture(int xwidth);
+public:
+    SortingNetworkPainter(int n, int m, int width, int height, \
+                const QColor& lines, const QColor& background);
+    void addComparator(int, int) override;
+    void addSynchronizer(int, int) override {}
+    int operations() const { return ops; }
+    int levels() const;
+    QPixmap finishPicture() {
+        return finishPicture(pictureWidth());
+    }
 };
 
 class LeveledSortingNetworkPainter : public SortingNetworkPainter {
 public:
     LeveledSortingNetworkPainter(int n, int m, int width, int height, \
-                const QColor& lines, const QColor& background, bool show_test, bool reproducible_random): \
-                SortingNetworkPainter(n, m, width, height, lines, background, show_test, reproducible_random){}
-    void addSynchronizer(int left, int right) override;
+                const QColor& lines, const QColor& background): \
+                SortingNetworkPainter(n, m, width, height, lines, background) { }
+    void addSynchronizer(int, int) override;
 };
 
-void generate_network(int index, int n, SortingNetworkBuilder *builder);
-int estimate_columns(int index, int n);
+template<typename BasePainter>
+class TestedSortingNetworkPainter : public BasePainter {
+protected:
+    SortingNetworkTester tester;
+    QPixmap finishPicture(int xwidth, const QFont& testFont);
+public:
+    TestedSortingNetworkPainter(int n, int m, int width, int height, \
+                const QColor& lines, const QColor& background, \
+                int equal_elements, bool reproducible_random): \
+                BasePainter(n, m, width, height, lines, background), \
+                tester(n, equal_elements, reproducible_random) { }
+    
+    void addComparator(int i, int j) override;
+    bool checkTestResult() const {
+        return tester.testSorted();
+    }
+    QPixmap finishPicture(const QFont& testFont) {
+        return finishPicture(pictureWidth(), testFont);
+    }
+    QPixmap finishPicture() {
+        return BasePainter::finishPicture(pictureWidth());
+    }
+};
 
 #endif

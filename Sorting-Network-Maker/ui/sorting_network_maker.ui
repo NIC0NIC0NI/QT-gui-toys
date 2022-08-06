@@ -65,7 +65,7 @@
           </item>
           <item>
            <property name="text">
-            <string>Odd-even Transposition</string>
+            <string>Odd-even transposition</string>
            </property>
           </item>
           <item>
@@ -105,12 +105,12 @@
           </item>
           <item>
            <property name="text">
-            <string>Optimal Size</string>
+            <string>Optimal size</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Optimal Latency</string>
+            <string>Optimal latency</string>
            </property>
           </item>
          </widget>
@@ -252,8 +252,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1266</width>
-         <height>608</height>
+         <width>1256</width>
+         <height>559</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -291,7 +291,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>17</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -309,22 +309,31 @@
     <addaction name="actionAbout"/>
     <addaction name="actionQt"/>
    </widget>
-   <widget class="QMenu" name="menuAppearance">
+   <widget class="QMenu" name="menuSettings">
     <property name="title">
-     <string>Appearance</string>
+     <string>Settings</string>
     </property>
+    <widget class="QMenu" name="menuTestExample">
+     <property name="title">
+      <string>Test Example</string>
+     </property>
+     <addaction name="actionShowTestExample"/>
+     <addaction name="actionTestReproducible"/>
+     <addaction name="actionTestStability"/>
+     <addaction name="actionExampleFont"/>
+    </widget>
     <addaction name="actionLineColor"/>
     <addaction name="actionBackgroundColor"/>
     <addaction name="separator"/>
     <addaction name="actionResolution"/>
     <addaction name="separator"/>
     <addaction name="actionSplitLevels"/>
-    <addaction name="actionShowTestExample"/>
     <addaction name="actionKeepAspectRatio"/>
-    <addaction name="actionReproducibleRandom"/>
+    <addaction name="separator"/>
+    <addaction name="menuTestExample"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuAppearance"/>
+   <addaction name="menuSettings"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -383,17 +392,6 @@
     <string>Split Levels</string>
    </property>
   </action>
-  <action name="actionShowTestExample">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show Test Example</string>
-   </property>
-  </action>
   <action name="actionKeepAspectRatio">
    <property name="checkable">
     <bool>true</bool>
@@ -405,7 +403,23 @@
     <string>Keep Aspect Ratio</string>
    </property>
   </action>
-  <action name="actionReproducibleRandom">
+  <action name="actionResolution">
+   <property name="text">
+    <string>Resolution</string>
+   </property>
+  </action>
+  <action name="actionShowTestExample">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Test Example</string>
+   </property>
+  </action>
+  <action name="actionTestReproducible">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -416,9 +430,14 @@
     <string>Reproducible Randomness</string>
    </property>
   </action>
-  <action name="actionResolution">
+  <action name="actionExampleFont">
    <property name="text">
-    <string>Resolution</string>
+    <string>Font</string>
+   </property>
+  </action>
+  <action name="actionTestStability">
+   <property name="text">
+    <string>Test Sorting Stability</string>
    </property>
   </action>
  </widget>
