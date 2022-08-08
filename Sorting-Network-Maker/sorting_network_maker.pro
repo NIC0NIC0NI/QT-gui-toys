@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui svg
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -10,11 +10,10 @@ SOURCES += src/main.cpp \
            src/sorting_network_maker.cpp \
            src/sorting_network_generator.cpp \
            src/sorting_network_painter.cpp \
-           src/sorting_network_tester.cpp
+           src/sorting_network_analyzer.cpp
 
 HEADERS  += src/sorting_network_maker.h \
-            src/generators.h \
-            src/tester.h
+            src/generators.h
 
 FORMS    += ui/sorting_network_maker.ui
 

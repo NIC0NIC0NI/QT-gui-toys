@@ -1,77 +1,105 @@
 #ifndef GENERATORS_H_INCLUDED
 #define GENERATORS_H_INCLUDED 1
 
-#include <QColor>
+#include <cstddef>
+#include <cstring>
+#include <type_traits>
+#include <QScopedArrayPointer>
 #include <QVector>
-#include <QPixmap>
-#include <QPainter>
-#include "tester.h"
+#include <QString>
+#include <QColor>
+#include <QPicture>
 
-class SortingNetworkBuilder {
-public:
-    /* r1 < r2 */
-    virtual void addComparator(int r1, int r2) = 0;
-    virtual void addSynchronizer(int begin, int width) = 0;
-    virtual ~SortingNetworkBuilder() {}
-};
+#define SORTING_NETWORK_MAX_INPUT 128
 
-void generate_network(int index, int n, SortingNetworkBuilder *builder);
-int estimate_columns(int index, int n);
+namespace sorting_network {
+    typedef std::integral_constant<int, 0> zero_type;
+    template<typename T>
+    class ScopedArray : public QScopedArrayPointer<T> {
+    public:
+        void setZero(std::size_t n) { std::memset(this->data(), 0, sizeof(T) * n); }
+        ScopedArray(std::size_t n) : QScopedArrayPointer<T>(new T[n]) {}
+        ScopedArray(std::size_t n, std::integral_constant<T, 0>) : ScopedArray(n) { setZero(n); }
+        using QScopedArrayPointer<T>::data;
+        using QScopedArrayPointer<T>::operator[];
+    };
 
-class SortingNetworkPainter : public SortingNetworkBuilder {
-protected:
-    QPixmap pic;
-    QPainter painter;
-    QColor color;
-    QVector<int> latency;
-    QVector<int> l_column;
-    QVector<bool> holes;
-    int ops, n, width, height, lw_vert, lw_hori;
-    void drawComparator(int i, int j);
-    int pictureWidth() const;
-    QPixmap finishPicture(int xwidth);
-public:
-    SortingNetworkPainter(int n, int m, int width, int height, \
-                const QColor& lines, const QColor& background);
-    void addComparator(int, int) override;
-    void addSynchronizer(int, int) override {}
-    int operations() const { return ops; }
-    int levels() const;
-    QPixmap finishPicture() {
-        return finishPicture(pictureWidth());
-    }
-};
-
-class LeveledSortingNetworkPainter : public SortingNetworkPainter {
-public:
-    LeveledSortingNetworkPainter(int n, int m, int width, int height, \
-                const QColor& lines, const QColor& background): \
-                SortingNetworkPainter(n, m, width, height, lines, background) { }
-    void addSynchronizer(int, int) override;
-};
-
-template<typename BasePainter>
-class TestedSortingNetworkPainter : public BasePainter {
-protected:
-    SortingNetworkTester tester;
-    QPixmap finishPicture(int xwidth, const QFont& testFont);
-public:
-    TestedSortingNetworkPainter(int n, int m, int width, int height, \
-                const QColor& lines, const QColor& background, \
-                int equal_elements, bool reproducible_random): \
-                BasePainter(n, m, width, height, lines, background), \
-                tester(n, equal_elements, reproducible_random) { }
+    struct Comparator {
+        int where, low, high;
+        Comparator(){}
+        Comparator(int lv, int ll, int hh) : where(lv), low(ll), high(hh) {}
+    };
     
-    void addComparator(int i, int j) override;
-    bool checkTestResult() const {
-        return tester.testSorted();
+    class Layout {
+    public:
+        Layout(int n) : latency(n, zero_type()), ops(0), input_n(n) {}
+        void addComparator(int i, int j);
+        void addSynchronizer(int i, int j);
+        void layout(bool split_levels, bool compact);
+        int getNumberOfComparator() const { return ops; }
+        int getLatency() const;
+        int getLayoutWidth() const { return column_m; }
+    protected:
+        QVector<Comparator> comparators;
+        ScopedArray<int> latency;
+        int ops, input_n, column_m;
+        int preprocessLayout(bool split_levels, bool compact);
+    };
+
+    class Painter : public Layout {
+    public:
+        Painter(int n) : Layout(n) {}
+        QPicture paint(int width, int height, const QColor& lines, const QColor& background);
+    };
+
+    class Tester {
+    public:
+        typedef int TestData;
+        Tester(int n, TestData equal_elements, bool reproducible);
+        bool checkSorted() const;
+        void compareAndSwap(int i, int j);
+        QString showInputAt(int i) const { return showData(input[i], this->low_bits); }
+        QString showOutputAt(int i) const { return showData(output[i], this->low_bits); }
+    private:
+        QScopedArrayPointer<TestData> input, output;
+        int input_n;
+        TestData low_bits;
+        static QString showData(TestData value, TestData low_bits_);
+    };
+
+    class TestedPainter : public Painter {
+        Tester tester;
+    public:
+        typedef Tester::TestData TestData;
+        TestedPainter(int n, TestData equal_elements, bool reproducible) : \
+            Painter(n), tester(n, equal_elements, reproducible) {}
+        bool checkSorted() const { return tester.checkSorted(); }
+        void addComparator(int i, int j) {
+            this->Layout::addComparator(i, j);
+            tester.compareAndSwap(i, j);
+        }
+        using Painter::paint;
+        QPicture paint(int width, int height, const QColor& lines, \
+            const QColor& background, const QFont& font);
+    };
+
+    typedef TestedPainter Builder;
+
+    namespace algorithm {
+        void generate_network(int index, int n, Builder *builder);
+        int estimate_columns(int index, int n);
+        int maximum_n(int index);
     }
-    QPixmap finishPicture(const QFont& testFont) {
-        return finishPicture(pictureWidth(), testFont);
+
+    QPixmap picture_to_pixmap(const QPicture& picture);
+    bool show_picture(const QPicture& picture, QPaintDevice* device);
+
+    inline int ceil_pow_2(int x) {
+        int i;
+        for(i = 0; (1 << i) < x; ++i);
+        return i;
     }
-    QPixmap finishPicture() {
-        return BasePainter::finishPicture(pictureWidth());
-    }
-};
+}
+
 
 #endif

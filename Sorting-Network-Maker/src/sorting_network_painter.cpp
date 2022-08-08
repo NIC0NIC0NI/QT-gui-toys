@@ -1,127 +1,108 @@
 #include <cmath>
-#include <limits>
+#include <QPainter>
+#include <QPainterPath>
 #include "generators.h"
+
+namespace sorting_network {
 
 inline int line_width(int resolution) {
     return std::max(1, resolution / 18);
 }
 
-SortingNetworkPainter::SortingNetworkPainter(int n, int m, int width, int height,\
-                                            const QColor& lines, const QColor& background): \
-        pic(m * width, n * height), painter(&pic), color(lines), \
-        latency(n, 0), l_column(n, 2), holes(n*m, true), \
-        ops(0),  n(n), width(width), height(height), \
-        lw_vert(line_width(width)), lw_hori(line_width(height)) {
-    this->pic.fill(background);
-    this->painter.setPen(lines);
-    int left = 0, right = m * width - 1;
+struct PainterTemporary {
+    QPainter painter;
+    QColor color;
+    int width, height, lw_vert, lw_hori;
+
+    PainterTemporary(int n, int m, int w, int h, int margin, \
+            const QColor& lines, const QColor& background, QPaintDevice* picture);
+    void drawComparator(int r1, int r2, int c);
+    void setFont(const QFont& font, int size) {
+        auto f = font;
+        f.setPixelSize(size);
+        this->painter.setFont(f);
+    }
+};
+
+PainterTemporary::PainterTemporary(int n, int m, int w, int h, int margin, \
+        const QColor& lines, const QColor& background, QPaintDevice* picture) \
+    : color(lines), width(w), height(h), lw_vert(line_width(w)), lw_hori(line_width(h)) {
+    constexpr qreal half = 0.5;
+    painter.begin(picture);
+    painter.setBrush(lines);
+    painter.setPen(lines);
+    painter.setBackground(background);
+    painter.setBackgroundMode(Qt::TransparentMode);
+    painter.eraseRect(0, 0, m * width, n * height);
+    int right = m * width - 1 - 2 * margin;
     for(int i = 0; i < n; ++i) {
-        int y = i * height + (height - lw_hori + 1) / 2;
-        this->painter.fillRect(left, y, right, lw_hori, lines);
+        QRectF line(margin, i * height + (height - lw_hori + 1) * half, right, lw_hori);
+        painter.drawRect(line);
     }
 }
 
-template<typename Iterator>
-bool all_of(Iterator begin, Iterator end) {
-    for(Iterator i = begin; i != end; ++i) {
-        if(!*i) {
-            return false;
-        }
+void PainterTemporary::drawComparator(int r1, int r2, int c) {
+    constexpr qreal half = 0.5;
+    const int dy = (r2 - r1) * height;
+    const int radius = std::min(width, height) / 8;
+    const qreal x = c * width + width * half;
+    const qreal y1 = r1 * height + height * half;
+    QPainterPath circle1, circle2;
+    QRectF line(x - (lw_vert - 1) * half, y1 - (lw_hori - 1) * half, lw_vert, dy);
+    circle1.addEllipse(QPointF(x + half, y1 + half), radius, radius);
+    circle2.addEllipse(QPointF(x + half, y1 + half + dy), radius, radius);
+    painter.drawRect(line);
+    painter.drawPath(circle1);
+    painter.drawPath(circle2);
+}
+
+QPicture Painter::paint(int width, int height, const QColor& lines, \
+                       const QColor& background) {
+    int m = this->getLayoutWidth() + 4, n = this->input_n;
+    QPicture picture;
+    PainterTemporary painter(n, m, width, height, 0, lines, background, &picture);
+    for(auto& comp : this->comparators) {
+        painter.drawComparator(comp.low, comp.high, comp.where + 2);
     }
-    return true;
+    picture.setBoundingRect(QRect(0, 0, m * width, n * height));
+    return picture;
 }
 
-void SortingNetworkPainter::drawComparator(int r1, int r2) {
-    auto begin = this->holes.begin();
-    int first = std::max(this->l_column.at(r1), this->l_column.at(r2));
-    for(int c = first; ; ++c) {
-        auto i1 = begin + c * this->n + r1;
-        auto i2 = begin + c * this->n + r2 + 1;
-
-        if(all_of(i1, i2)) {
-            const int lw_vert = this->lw_vert;
-            const int lw_hori = this->lw_hori;
-            const int width = this->width;
-            const int height = this->height;
-            const int dy = (r2 - r1) * height;
-            const int radius = std::min(width, height) / 8;
-            const int x = c * width;
-            const int y1 = r1 * height;
-            this->painter.fillRect(
-                x + (width - lw_vert + 1) / 2, 
-                y1 + (height - lw_hori + 1) / 2, 
-                lw_vert, dy, this->color
-            );
-            for(int i = - radius; i <= radius; ++i) { // fill circle
-                int chord = (int)std::sqrt(radius * radius - i*i);
-                for(int j = y1 - chord; j <= y1 + chord; ++j) {
-                    this->painter.drawPoint(x + i + width / 2, j + height / 2);
-                    this->painter.drawPoint(x + i + width / 2, dy + j + height / 2);
-                }
-            }
-            std::fill(i1, i2, false);
-            this->l_column.replace(r1, c + 1);
-            this->l_column.replace(r2, c + 1);
-            return;
-        }
+QPicture TestedPainter::paint(int width, int height, const QColor& lines, \
+                       const QColor& background, const QFont& font) {
+    const int m = this->getLayoutWidth() + 4, n = this->input_n;
+    const int width_125 = width + (width >> 2);
+    QPicture picture;
+    PainterTemporary painter(n, m, width, height, width_125, lines, background, &picture);
+    for(auto& comp : this->comparators) {
+        painter.drawComparator(comp.low, comp.high, comp.where + 2);
     }
-}
-
-void SortingNetworkPainter::addComparator(int r1, int r2) {
-    this->drawComparator(r1, r2);
-    this->ops += 1;
-    auto new_value = std::max(this->latency.at(r1),this->latency.at(r2)) + 1;
-    this->latency.replace(r1, new_value);
-    this->latency.replace(r2, new_value);
-}
-
-void LeveledSortingNetworkPainter::addSynchronizer(int begin, int width) {
-    auto ibegin = this->l_column.begin() + begin;
-    auto iend = ibegin + width;
-    int m = *std::max_element(ibegin, iend);
-    std::fill(ibegin, iend, m);
-}
-
-int SortingNetworkPainter::levels() const {
-    return *std::max_element(this->latency.cbegin(), this->latency.cend());
-}
-
-int SortingNetworkPainter::pictureWidth() const {
-    return *std::max_element(this->l_column.cbegin(), this->l_column.cend()) * width;
-}
-
-QPixmap SortingNetworkPainter::finishPicture(int xwidth) { 
-    this->painter.end();
-    pic = pic.copy(0, 0, xwidth + (width << 1), this->n * height);
-    return pic;
-}
-
-template<typename BasePainter>
-QPixmap TestedSortingNetworkPainter<BasePainter>::finishPicture(int xwidth, const QFont& testFont) {
-    auto out_left = xwidth + ((3 * width) >> 2);
-    auto width_125 = width + (width >> 2);
-    auto font = testFont;
-    font.setPixelSize(height * 2 / 3);
-    this->painter.setFont(font);
-    this->painter.eraseRect(0,        0, width_125, n * height);
-    this->painter.eraseRect(out_left, 0, width_125, n * height);
+    painter.setFont(font, std::min(width, height) * 2 / 3);
+    auto out_left = m * width - 1 - width_125;
     for(int i = 0; i < n; ++i) {
         int y = i * height;
-        this->painter.drawText(0,        y, width_125, height, \
+        painter.painter.drawText(0,        y, width_125, height, \
             Qt::AlignCenter, this->tester.showInputAt(i));
-        this->painter.drawText(out_left, y, width_125, height, \
+        painter.painter.drawText(out_left, y, width_125, height, \
             Qt::AlignCenter, this->tester.showOutputAt(i));
     }
-    return BasePainter::finishPicture(xwidth);
+    picture.setBoundingRect(QRect(0, 0, m * width, n * height));
+    return picture;
 }
 
-template<typename BasePainter>
-void TestedSortingNetworkPainter<BasePainter>::addComparator(int i, int j) {
-    BasePainter::addComparator(i, j);
-    tester.compareAndSwap(i, j);
+bool show_picture(const QPicture& picture, QPaintDevice* device) {
+    QPainter painter;
+    painter.begin(device);
+    painter.drawPicture(0, 0, picture);
+    return painter.end();
 }
 
-template QPixmap TestedSortingNetworkPainter<SortingNetworkPainter>::finishPicture(int xwidth, const QFont& testFont);
-template QPixmap TestedSortingNetworkPainter<LeveledSortingNetworkPainter>::finishPicture(int xwidth, const QFont& testFont);
-template void TestedSortingNetworkPainter<SortingNetworkPainter>::addComparator(int i, int j);
-template void TestedSortingNetworkPainter<LeveledSortingNetworkPainter>::addComparator(int i, int j);
+QPixmap picture_to_pixmap(const QPicture& picture) {
+    auto rect = picture.boundingRect();
+    QPixmap pixmap(rect.width(), rect.height());
+    pixmap.fill(Qt::transparent);
+    show_picture(picture, &pixmap);
+    return pixmap;
+}
+
+}

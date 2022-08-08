@@ -163,6 +163,9 @@
         <property name="text">
          <string>generate</string>
         </property>
+        <property name="whatsThis">
+         <string>Generate the picture representing the sorting network. (Shortcut: Enter)</string>
+        </property>
        </widget>
       </item>
       <item row="1" column="1">
@@ -178,6 +181,9 @@
         </property>
         <property name="text">
          <string>save</string>
+        </property>
+        <property name="whatsThis">
+         <string>Save the generated picture. (Shortcut: Ctrl+S)</string>
         </property>
        </widget>
       </item>
@@ -200,6 +206,9 @@
             <height>0</height>
            </size>
           </property>
+          <property name="whatsThis">
+           <string>The number of compare-and-swap operations in a sorting network.</string>
+          </property>
           <property name="text">
            <string>Comparators:</string>
           </property>
@@ -207,6 +216,9 @@
         </item>
         <item>
          <widget class="QLabel" name="opValueLabel">
+          <property name="whatsThis">
+           <string>The number of compare-and-swap operations in a sorting network.</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -214,6 +226,9 @@
         </item>
         <item>
          <widget class="QLabel" name="latencyNameLabel">
+          <property name="whatsThis">
+           <string>When a sorting network can be executed with arbitrary parallelism, here shows its latency.</string>
+          </property>
           <property name="text">
            <string>Latency:</string>
           </property>
@@ -221,6 +236,9 @@
         </item>
         <item>
          <widget class="QLabel" name="latencyValueLabel">
+          <property name="whatsThis">
+           <string>When a sorting network can be executed with arbitrary parallelism, here shows its latency.</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -302,10 +320,12 @@
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
-   <widget class="QMenu" name="menuAbout">
+   <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>About</string>
+     <string>Help</string>
     </property>
+    <addaction name="actionWhatsThis"/>
+    <addaction name="separator"/>
     <addaction name="actionAbout"/>
     <addaction name="actionQt"/>
    </widget>
@@ -324,17 +344,19 @@
     </widget>
     <addaction name="actionLineColor"/>
     <addaction name="actionBackgroundColor"/>
+    <addaction name="actionBackgroundTransparency"/>
     <addaction name="separator"/>
     <addaction name="actionResolution"/>
+    <addaction name="actionKeepAspectRatio"/>
     <addaction name="separator"/>
     <addaction name="actionSplitLevels"/>
-    <addaction name="actionKeepAspectRatio"/>
+    <addaction name="actionCompact"/>
     <addaction name="separator"/>
     <addaction name="menuTestExample"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
-   <addaction name="menuAbout"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -352,6 +374,9 @@
    <property name="text">
     <string>Save</string>
    </property>
+   <property name="whatsThis">
+    <string>Save the generated picture.</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
    </property>
@@ -363,12 +388,12 @@
   </action>
   <action name="actionQt">
    <property name="text">
-    <string>Qt</string>
+    <string>About Qt</string>
    </property>
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>Sorting Network Maker</string>
+    <string>About Sorting Network Maker</string>
    </property>
   </action>
   <action name="actionLineColor">
@@ -381,6 +406,11 @@
     <string>Background Color</string>
    </property>
   </action>
+  <action name="actionBackgroundTransparency">
+   <property name="text">
+    <string>Background Transparency</string>
+   </property>
+  </action>
   <action name="actionSplitLevels">
    <property name="checkable">
     <bool>true</bool>
@@ -389,7 +419,24 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Split Levels</string>
+    <string>Split Parallel Levels</string>
+   </property>
+   <property name="whatsThis">
+    <string>When the option "Split Parallel Levels" is enabled, the comparators will be sorted by their parallel latency. Also, comparators different latency cannot be drawn in the same column.</string>
+   </property>
+  </action>
+  <action name="actionCompact">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Compact Layout</string>
+   </property>
+   <property name="whatsThis">
+    <string>When the option "Compact Layout" is enabled, the comparators may be reordered to make the layout more compact.</string>
    </property>
   </action>
   <action name="actionKeepAspectRatio">
@@ -429,6 +476,9 @@
    <property name="text">
     <string>Reproducible Randomness</string>
    </property>
+   <property name="whatsThis">
+    <string>When the option "Reproducible Randomness" is enabled, the generated test example will be the same in each repeated generation.</string>
+   </property>
   </action>
   <action name="actionExampleFont">
    <property name="text">
@@ -438,6 +488,17 @@
   <action name="actionTestStability">
    <property name="text">
     <string>Test Sorting Stability</string>
+   </property>
+   <property name="whatsThis">
+    <string>A sorting algorithm is defined to be stable if it preserves the relative order of equal elements. Here configures the test examples to test the stability of the sorting networks.</string>
+   </property>
+  </action>
+  <action name="actionWhatsThis">
+   <property name="text">
+    <string>What's this?</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
    </property>
   </action>
  </widget>
