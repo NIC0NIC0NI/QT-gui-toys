@@ -15,7 +15,7 @@ class PinyinBianjiqi : public QMainWindow
     Q_OBJECT
 
 public:
-    PinyinBianjiqi(const char* startFileName, QWidget *parent = Q_NULLPTR);
+    PinyinBianjiqi(const QString& startFileName, QWidget *parent = Q_NULLPTR);
     enum SaveFileStatus {Success, Failure, Canceled};
 
 public slots:
@@ -42,6 +42,7 @@ protected:
     bool openFileByName(const QString &filename);
     SaveFileStatus saveTextEditToFile(const QTextEdit &textEdit, const QString &filename);
     void errorMessage(const QString &msg);
+    QString fileFormat();
 };
 
 #endif

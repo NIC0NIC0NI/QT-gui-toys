@@ -51,12 +51,7 @@ void SortingNetworkMaker::whatsThis() {
 void SortingNetworkMaker::save() {
     QString defaultFileName(tr("untitled")), fileFormat;
     defaultFileName.append(".png");
-    fileFormat.append(tr("Portable Network Graphics")).append(" (*.png);;");
-    fileFormat.append(tr("Joint Photographic Experts Group")).append(" (*.jpg);;");
-    fileFormat.append(tr("Portable Pixmap")).append(" (*.ppm);;");
-    fileFormat.append(tr("Windows Bitmap")).append(" (*.bmp);;");
-    fileFormat.append(tr("X11 Bitmap")).append(" (*.xbm);;");
-    fileFormat.append(tr("X11 Pixmap")).append(" (*.xpm);;");
+    fileFormat.append(tr("Pixel Image")).append(" (*.png *.jpg *.bmp *.ppm *.xbm *.xpm);;");
     fileFormat.append(tr("Scalable Vector Graphics")).append(" (*.svg);;");
     fileFormat.append(tr("QT Painter Command Sequence")).append(" (*.pic)");
 
@@ -78,6 +73,8 @@ void SortingNetworkMaker::save() {
         }
         if(ok) {
             this->saved = true;
+        } else {
+            this->errorMessage(tr("Failed to save figure as \"%1\"").arg(filename));
         }
     }
 }
@@ -116,7 +113,7 @@ void SortingNetworkMaker::selectBackgroundTransparency() {
 
 void SortingNetworkMaker::selectResolution() {
     bool ok;
-    auto resolution = QInputDialog::getInt(this, tr("Select resolution"), tr("scale"), 
+    auto resolution = QInputDialog::getInt(this, tr("Set resolution"), tr("pixels"), 
         this->resolution, 2, 256, 1, &ok);
     if (ok) {
         this->resolution = resolution;
@@ -177,8 +174,9 @@ void SortingNetworkMaker::generate() {
     this->pixmap = picture_to_pixmap(this->picture);
     this->refresh();
     if(!builder.checkSorted()) {
-        const char* msg = (equal > 1) ? "This network fails the stability test." : "This network fails the test.";
-        QMessageBox::warning(this, tr("Warning"), tr(msg));
+        QString msg = ((equal > 1) ? tr("This network fails the stability test.") \
+            : tr("This network fails the correctness test."));
+        this->errorMessage(msg);
     }
 }
 
@@ -213,6 +211,10 @@ void SortingNetworkMaker::closeEvent(QCloseEvent *event) {
     else {
         event->ignore();
     }
+}
+
+void SortingNetworkMaker::errorMessage(const QString &msg){
+    QMessageBox::warning(this, tr("Error"), msg);
 }
 
 void SortingNetworkMaker::about() {

@@ -202,7 +202,7 @@ void Layout::layout(bool split_levels, bool compact) {
     ScopedArray<int> position(n, zero_type());
     const auto pb = position.data(), pe = pb + n;
     auto est_column = this->preprocessLayout(split_levels, compact);
-    if(compact) {  // recompute layout
+    if(compact) {  // recompute a compact layout
         ScopedArray<bool> holes(n * est_column, std::false_type());
         const auto h = holes.data();
         if(split_levels) {

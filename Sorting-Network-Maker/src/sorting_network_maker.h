@@ -43,6 +43,7 @@ protected:
     virtual void closeEvent(QCloseEvent *event);
     bool askSaveOrContinue();
     void refresh();
+    void errorMessage(const QString &msg);
 };
 
 #endif

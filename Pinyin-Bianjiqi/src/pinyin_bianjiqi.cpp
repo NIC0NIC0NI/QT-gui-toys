@@ -8,7 +8,7 @@
 #include "common.h"
 #include "pinyin_bianjiqi.h"
 
-PinyinBianjiqi::PinyinBianjiqi(const char* startFileName, QWidget *parent)
+PinyinBianjiqi::PinyinBianjiqi(const QString& startFileName, QWidget *parent)
     : QMainWindow(parent), updateTimer(this), currentFileName() {
     this->ui.setupUi(this);
     this->updateTimer.setSingleShot(true);
@@ -27,12 +27,11 @@ PinyinBianjiqi::PinyinBianjiqi(const char* startFileName, QWidget *parent)
     connect(this->ui.textEdit, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
     connect(&this->updateTimer, SIGNAL(timeout()), this, SLOT(updateText()));
 
-    if(startFileName != Q_NULLPTR) {
-        QString filename (startFileName);
-        if (this->openFileByName(filename)) {
-            this->currentFileName.swap(filename);
+    if(!startFileName.isEmpty()) {
+        if (this->openFileByName(startFileName)) {
+            this->currentFileName = startFileName;
         } else {
-            this->errorMessage(tr("Cannot open file \"%1\"").arg(filename));
+            this->errorMessage(tr("Cannot open file \"%1\"").arg(startFileName));
         }
     }
 }
@@ -58,12 +57,18 @@ void PinyinBianjiqi::newFile() {
     }
 }
 
+QString PinyinBianjiqi::fileFormat() {
+    QString format;
+    format.append(tr("HTML")).append("(*.html);;");
+    format.append(tr("Text file")).append("(*.txt)");
+    return format;
+}
+
 void PinyinBianjiqi::openFile() {
     if (this->askSaveOrContinue()) {
         auto filename = QFileDialog::getOpenFileName(
             this, tr("Select an input file to open"), 
-            ".", 
-            tr("HTML (*.html);;Text file (*.txt)")
+            ".", fileFormat()
         );
         if (!filename.isNull()) {
             if (this->openFileByName(filename)) {
@@ -108,7 +113,7 @@ void PinyinBianjiqi::saveAsFile() {
         this, 
         tr("Save input as file"), 
         tr("untitled input.html"), 
-        tr("HTML (*.html);;Text file (*.txt)")
+        fileFormat()
     );
     if (!filename.isNull()) {
         auto status = this->saveTextEditToFile(*this->ui.textEdit, filename);
@@ -125,8 +130,8 @@ void PinyinBianjiqi::saveOutput() {
     auto filename = QFileDialog::getSaveFileName(
         this, 
         tr("Save pīnyīn as file"), 
-        tr("untitled pīnyīn.html"), 
-        tr("HTML (*.html);;Text file (*.txt)")
+        tr("untitled pīnyīn.html"),
+        fileFormat()
     );
     if (!filename.isNull()) {
         if (this->saveTextEditToFile(*this->ui.textShow, filename) == Failure) {
@@ -241,16 +246,14 @@ void PinyinBianjiqi::errorMessage(const QString &msg){
 }
 
 void PinyinBianjiqi::about() {
-    QMessageBox msg_box(this);
-    msg_box.setWindowTitle(tr("About Pīnyīn Biānjíqì"));
-    msg_box.setTextFormat(Qt::RichText);   //this is what makes the links clickable
-    msg_box.setText(
-        tr("<p>This is an opensource software.</p>"
-        "<p>Author: <a href='https://github.com/NIC0NIC0NI'>NIC0NIC0NI</a></p>"
-        "<p>License: <a href='http://doc.qt.io/qt-5/lgpl.html'>GNU LGPL version 3</a></p>"
-        "<p>View source code: "
-        "<a href='https://github.com/NIC0NIC0NI/QT-gui-toys.git'>"
-        "QT-gui-toys.git</a></p>")
-    );
-    msg_box.exec();
+    const char *p = "<p>", *q = "</p>";
+    QString text;
+    text.append(p).append((tr("This is an opensource software."))).append(q);
+    text.append(p).append(tr("Author: "));
+    text.append("<a href='https://github.com/NIC0NIC0NI'>NIC0NIC0NI</a>").append(q);
+    text.append(p).append(tr("License: "));
+    text.append("<a href='http://doc.qt.io/qt-5/lgpl.html'>GNU LGPL version 3</a>").append(q);
+    text.append(p).append(tr("View source code: "));
+    text.append("<a href='https://github.com/NIC0NIC0NI/QT-gui-toys.git'>QT-gui-toys.git</a>").append(q);
+    QMessageBox::about(this, tr("About Pīnyīn Biānjíqì"), text);
 }

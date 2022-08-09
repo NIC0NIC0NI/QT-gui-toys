@@ -54,6 +54,7 @@ void generate_bitonic(Builder *builder, int n) {
                 builder->addComparator(i + left, i + right);
             }
         }
+        builder->addSynchronizer(0, n);
         for(int d_2 = d_1 - 1; d_2 >= 0; --d_2) {
             const int length_2 = 1 << d_2;
             for(int j = 0; j < length_2; ++j) {
@@ -65,6 +66,7 @@ void generate_bitonic(Builder *builder, int n) {
                     builder->addComparator(i + left, i + right);
                 }
             }
+            builder->addSynchronizer(0, n);
         }
     }
 }

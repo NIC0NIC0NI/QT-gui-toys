@@ -18,3 +18,5 @@ HEADERS  += src/sorting_network_maker.h \
 FORMS    += ui/sorting_network_maker.ui
 
 RESOURCES += rsrc/sorting_network_maker.qrc
+
+TRANSLATIONS += lang/cn.ts

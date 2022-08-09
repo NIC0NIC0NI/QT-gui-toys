@@ -24,7 +24,7 @@
     <normaloff>:/icon/icon.png</normaloff>:/icon/icon.png</iconset>
   </property>
   <property name="locale">
-   <locale language="Chinese" country="China"/>
+   <locale language="English" country="AnyCountry"/>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -60,47 +60,47 @@
           </property>
           <item>
            <property name="text">
-            <string>Bubble</string>
+            <string>Bubble sort</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Odd-even transposition</string>
+            <string>Odd-even transposition sort</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Comb (3-smooth)</string>
+            <string>Comb sort (3-smooth)</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Bitonic</string>
+            <string>Bitonic sort</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Odd-even merge</string>
+            <string>Odd-even merge sort</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Merge-exchange</string>
+            <string>Merge-exchange sort</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Pairwise</string>
+            <string>Pairwise merge sort</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Bose Nelson</string>
+            <string>Bose Nelson merge sort</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Hibbard</string>
+            <string>Hibbard merge sort</string>
            </property>
           </item>
           <item>
@@ -210,7 +210,7 @@
            <string>The number of compare-and-swap operations in a sorting network.</string>
           </property>
           <property name="text">
-           <string>Comparators:</string>
+           <string>Number of Comparators:</string>
           </property>
          </widget>
         </item>
