@@ -12,7 +12,8 @@ SOURCES += src/main.cpp \
            src/sorting_network_painter.cpp \
            src/sorting_network_analyzer.cpp
 
-HEADERS  += src/sorting_network_maker.h \
+HEADERS  += src/common.h\
+            src/sorting_network_maker.h \
             src/generators.h
 
 FORMS    += ui/sorting_network_maker.ui
@@ -20,3 +21,5 @@ FORMS    += ui/sorting_network_maker.ui
 RESOURCES += rsrc/sorting_network_maker.qrc
 
 TRANSLATIONS += lang/cn.ts
+
+# QMAKE_CXXFLAGS += -DQT_NO_CAST_FROM_ASCII

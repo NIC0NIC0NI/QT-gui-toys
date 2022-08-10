@@ -48,7 +48,7 @@ inline bool isVowel(QChar c) {
     return (i != VOWEL_NUMBER.end() && i->key() == c);
 }
 
-inline int8_t doubleVowelCombinations(QChar a, QChar b) {
+inline quint8 doubleVowelCombinations(QChar a, QChar b) {
     return TABLE_2[vowelNumber(a) % 6][vowelNumber(b) % 6];
 }
 

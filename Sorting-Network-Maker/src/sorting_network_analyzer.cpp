@@ -1,41 +1,21 @@
+#include <limits>
 #include <iterator>
 #include <algorithm>
 #include <numeric>
 #include <functional>
 #include <QRandomGenerator>
-#include <iostream>
 #include "generators.h"
-
-namespace random {
-
-template<typename INT>
-struct Undeterminated {
-    INT operator()(INT i) const {
-        return QRandomGenerator::global()->bounded(i);
-    }
-};
-
-template<typename INT>
-struct Reproducible {
-    QRandomGenerator gen;
-    Reproducible() : gen(123456789u) {}
-    INT operator()(INT i) {
-        return gen.bounded(i);
-    }
-};
-
-}
 
 namespace sorting_network {
 
 template<typename GENERATOR, typename INT>
-void generate_test_data(int* data, int size, INT equal_elements, INT low_bits) {
+void generate_test_data(INT* data, int size, INT equal_elements, INT low_bits, GENERATOR&& gen) {
     auto e = data + size;
     std::iota(data, e, 0);
-    std::random_shuffle(data, e, GENERATOR());
+    std::shuffle(data, e, gen);
     if(low_bits > 0) {
         auto shrink_size = ((size - 1) / equal_elements) + 1;
-        ScopedArray<INT> count(shrink_size, zero_type());
+        IntegralArray<INT> count(shrink_size, std::integral_constant<INT, 0>());
         for(auto i = data; i != e; ++i) {
             INT key = (*i) / equal_elements;
             INT rank = count[key];
@@ -46,11 +26,12 @@ void generate_test_data(int* data, int size, INT equal_elements, INT low_bits) {
 }
 
 Tester::Tester(int n, TestData equal_elements, bool reproducible) \
-     : input(new int[n]), output(new int[n]), input_n(n), low_bits(ceil_pow_2(equal_elements)) {
+     : input(n), output(n), input_n(n), low_bits(ceil_log_2(equal_elements)) {
     if(reproducible) {
-        generate_test_data<random::Reproducible<TestData>>(this->input.data(), n, equal_elements, low_bits);
+        QRandomGenerator64 g({123456789, 987654321, 0xabcd1234, 0x5678dcba});
+        generate_test_data(this->input.data(), n, equal_elements, low_bits, g);
     } else {
-        generate_test_data<random::Undeterminated<TestData>>(this->input.data(), n, equal_elements, low_bits);
+        generate_test_data(this->input.data(), n, equal_elements, low_bits, *QRandomGenerator64::global());
     }
     std::memcpy(this->output.data(), this->input.data(), sizeof(int) * n);
 }
@@ -71,22 +52,11 @@ static const char equal_element_names[] = "ABCDEFGH";
 
 QString Tester::showData(TestData value, TestData low_bits) {
     TestData ih = value >> low_bits;
-    QString result;
-    result.setNum(ih);
+    QString result(QString::number(ih));
     if(low_bits > 0) {
         result.append(equal_element_names[value - (ih << low_bits)]);
     }
     return result;
-}
-
-template<typename Iterator>
-bool not_any(Iterator begin, Iterator end) {
-    for(Iterator i = begin; i != end; ++i) {
-        if(*i) {
-            return false;
-        }
-    }
-    return true;
 }
 
 // different from std::max_element, this function handles empty input
@@ -111,7 +81,7 @@ update_as_max(Iterator begin, Iterator end, \
 
 template<typename T, typename Key>
 void counting_sort(QVector<T>& vec, int max_value, Key key) { // stable
-    ScopedArray<int> counter(max_value + 1, zero_type());
+    IntegralArray<int> counter(max_value + 1, zero_type());
     QVector<T> cpy(vec.size());
     for(auto& c : vec) {
         ++ counter[key(c)];
@@ -146,13 +116,13 @@ inline int layout_comparator(int r1, int r2, int* latency, int* position) {
     return update_as_max(position + r1, position + (r2 + 1), 1);
 }
 
-int layout_comparator_compact(int n, int r1, int r2, int* position, bool* holes) {
+int layout_comparator_compact(int n, int r1, int r2, int* position, bool* occupied) {
     int pos = std::max(position[r1], position[r2]);
     for(int col = pos; ; ++col) {
-        auto i1 = holes + col * n + r1;
-        auto i2 = holes + col * n + (r2 + 1);
+        auto i1 = occupied + col * n + r1;
+        auto i2 = occupied + col * n + (r2 + 1);
 
-        if(not_any(i1, i2)) {
+        if(std::none_of(i1, i2, [](bool p) { return p; })) {
             std::fill(i1, i2, true);
             position[r1] = position[r2] = col + 1;
             return col;
@@ -162,65 +132,52 @@ int layout_comparator_compact(int n, int r1, int r2, int* position, bool* holes)
 
 int Layout::preprocessLayout(bool split_levels, bool compact) {
     const auto n = this->input_n;
-    ScopedArray<int> position(n, zero_type());
+    IntegralArray<int> position(n, zero_type());
     const auto lb = this->latency.data(), le = lb + n;
     const auto pb = position.data(), pe = pb + n;
+    int last_latency = 0;
 
     if(split_levels) {
-        int last_latency = 0;
         counting_sort(this->comparators,
             max_value(lb, le), [](const Comparator& c) { return c.where; }
         );
-        // recompute latency without synchronizers
-        this->latency.setZero(n);
-        for(auto& c : this->comparators) {
-            if(last_latency != c.where) {
-                last_latency = c.where;
-                update_as_max(pb, pe);
-            }
-            auto pos = layout_comparator(c.low, c.high, lb, pb);
-            if(!compact) {
-                c.where = pos;
-            }
+    }
+    // recompute latency without synchronizers
+    this->latency.fill(n, zero_type());
+    for(auto& c : this->comparators) {
+        if(split_levels && last_latency != c.where) {
+            last_latency = c.where;
+            update_as_max(pb, pe);
         }
-    } else {
-        this->latency.setZero(n);
-        for(auto& c : this->comparators) {
-            auto pos = layout_comparator(c.low, c.high, lb, pb);
-            if(!compact) {
-                c.where = pos;
-            }
+        auto pos = layout_comparator(c.low, c.high, lb, pb);
+        if(!compact) {
+            c.where = pos;
         }
     }
-    column_m = max_value(pb, pe);
-    return column_m;
+    return max_value(pb, pe);
 }
 
 
 void Layout::layout(bool split_levels, bool compact) {
     auto n = this->input_n;
-    ScopedArray<int> position(n, zero_type());
+    IntegralArray<int> position(n, zero_type());
     const auto pb = position.data(), pe = pb + n;
-    auto est_column = this->preprocessLayout(split_levels, compact);
+    auto column_m_loose = this->preprocessLayout(split_levels, compact);
     if(compact) {  // recompute a compact layout
-        ScopedArray<bool> holes(n * est_column, std::false_type());
-        const auto h = holes.data();
-        if(split_levels) {
-            int last_latency = 0;
-            for(auto& c : this->comparators) {
-                if(last_latency != c.where) {
-                    last_latency = c.where;
-                    update_as_max(pb, pe);
-                }
-                c.where = layout_comparator_compact(n, c.low, c.high, pb, h);
+        IntegralArray<bool> occupied(n * column_m_loose, false_type());
+        const auto o = occupied.data();
+        int last_latency = 0;
+        for(auto& c : this->comparators) {
+            if(split_levels && last_latency != c.where) {
+                last_latency = c.where;
+                update_as_max(pb, pe);
             }
-        } else {
-            for(auto& c : this->comparators) {
-                c.where = layout_comparator_compact(n, c.low, c.high, pb, h);
-            }
+            c.where = layout_comparator_compact(n, c.low, c.high, pb, o);
         }
         column_m = max_value(pb, pe);
-    } 
+    } else {
+        column_m = column_m_loose;
+    }
 }
 
 int Layout::getLatency() const {

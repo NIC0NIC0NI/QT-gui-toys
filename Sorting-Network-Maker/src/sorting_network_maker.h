@@ -24,9 +24,11 @@ public slots:
     void selectBackgroundColor();
     void selectBackgroundTransparency();
     void selectResolution();
-    void adjustInputRange(int index);
     void selectExampleFont();
     void selectStabilityTestType();
+    void adjustInputRange(int index);
+    void previousAlgorithm();
+    void nextAlgorithm();
     void whatsThis();
 
 private:

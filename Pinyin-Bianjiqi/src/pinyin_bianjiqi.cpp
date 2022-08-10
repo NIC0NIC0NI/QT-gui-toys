@@ -59,8 +59,8 @@ void PinyinBianjiqi::newFile() {
 
 QString PinyinBianjiqi::fileFormat() {
     QString format;
-    format.append(tr("HTML")).append("(*.html);;");
-    format.append(tr("Text file")).append("(*.txt)");
+    format.append(tr("HTML")).append(CSTR("(*.html);;"));
+    format.append(tr("Text file")).append(CSTR("(*.txt)"));
     return format;
 }
 
@@ -68,7 +68,7 @@ void PinyinBianjiqi::openFile() {
     if (this->askSaveOrContinue()) {
         auto filename = QFileDialog::getOpenFileName(
             this, tr("Select an input file to open"), 
-            ".", fileFormat()
+            QSTR("."), fileFormat()
         );
         if (!filename.isNull()) {
             if (this->openFileByName(filename)) {
@@ -147,7 +147,7 @@ PinyinBianjiqi::SaveFileStatus PinyinBianjiqi::saveTextEditToFile(
     if (!writer.open(QIODevice::WriteOnly | QIODevice::Text)) {
         return Failure;
     }
-    if (filename.endsWith(".txt")) {
+    if (filename.endsWith(CSTR(".txt"))) {
         if (QMessageBox::question(
                 this, 
                 tr("Save as text file"), 
@@ -246,14 +246,14 @@ void PinyinBianjiqi::errorMessage(const QString &msg){
 }
 
 void PinyinBianjiqi::about() {
-    const char *p = "<p>", *q = "</p>";
+    QLatin1String p("<p>"), q("</p>");
+    QLatin1String ref_author("<a href='https://github.com/NIC0NIC0NI'>NIC0NIC0NI</a>");
+    QLatin1String ref_license("<a href='http://doc.qt.io/qt-5/lgpl.html'>GNU LGPL version 3</a>");
+    QLatin1String ref_code("<a href='https://github.com/NIC0NIC0NI/QT-gui-toys.git'>QT-gui-toys.git</a>");
     QString text;
     text.append(p).append((tr("This is an opensource software."))).append(q);
-    text.append(p).append(tr("Author: "));
-    text.append("<a href='https://github.com/NIC0NIC0NI'>NIC0NIC0NI</a>").append(q);
-    text.append(p).append(tr("License: "));
-    text.append("<a href='http://doc.qt.io/qt-5/lgpl.html'>GNU LGPL version 3</a>").append(q);
-    text.append(p).append(tr("View source code: "));
-    text.append("<a href='https://github.com/NIC0NIC0NI/QT-gui-toys.git'>QT-gui-toys.git</a>").append(q);
+    text.append(p).append(tr("Author: ")).append(ref_author).append(q);
+    text.append(p).append(tr("License: ")).append(ref_license).append(q);
+    text.append(p).append(tr("View source code: ")).append(ref_code).append(q);
     QMessageBox::about(this, tr("About Pīnyīn Biānjíqì"), text);
 }

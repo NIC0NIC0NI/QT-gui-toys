@@ -4,6 +4,45 @@
 namespace sorting_network {
 namespace algorithm {
 
+typedef void (*SorterGenerator)(Builder *builder, int n);
+
+class MergeSortGenerator {
+protected:
+    Builder *builder;
+public:
+    MergeSortGenerator(Builder* b) : builder(b) {}
+    virtual void merge(int left_begin, int left_len, int right_begin, int right_end) = 0;
+    // only for top-down, bottom-up is somehow different
+    void mergesort_top_down(int i, int length);
+};
+
+#define MERGESORT_GENERATOR(ClassName) \
+    class ClassName : public MergeSortGenerator { \
+    public: \
+        ClassName(Builder* b) : MergeSortGenerator(b) {} \
+        void merge(int left_begin, int left_len, int right_begin, int right_end) override final; \
+    };
+
+MERGESORT_GENERATOR(BitonicMerger)
+MERGESORT_GENERATOR(OddEvenMerger)
+MERGESORT_GENERATOR(BoseNelsonMerger)
+
+template<typename Merger>
+void generate_mergesort_top_down(Builder *builder, int n) {
+    Merger(builder).mergesort_top_down(0, n);
+}
+
+void MergeSortGenerator::mergesort_top_down(int i, int length) {
+    if(length >= 2) {
+        const int right = length >> 1;
+        const int left = length - right;
+        this->mergesort_top_down(i, left);
+        this->mergesort_top_down(i + left, right);
+        this->builder->addSynchronizer(i, i + length);
+        this->merge(i, left, i + left, right);
+    }
+}
+
 void generate_bubble(Builder *builder, int n) {
     for(int i = n - 1; i > 0; -- i) {
         for(int j = 0; j < i; ++j) {
@@ -23,47 +62,60 @@ void generate_odd_even_transposition(Builder *builder, int n) {
 namespace comb_3smooth {
     static const int list[] = {1, 2, 3, 4, 6, 8, 9, 12, 16, 18, 24, 27, 32, \
         36, 48, 54, 64, 72, 81, 96, 108, 128};
-
-    static int find(int n) {
-        auto b = std::begin(list), e = std::end(list);
-        return std::lower_bound(b, e, n) - b;
-    }
 }
 
 void generate_3smooth_comb(Builder *builder, int n) {
-    for(auto ig = comb_3smooth::find(n) - 1; ig >= 0; --ig) {
-        auto gap = comb_3smooth::list[ig], l = n - gap;
+    auto b = std::begin(comb_3smooth::list), e = std::end(comb_3smooth::list);
+    for(auto ig = std::lower_bound(b, e, n); ig != b; --ig) {
+        auto gap = *(ig - 1), l = n - gap;
         for(int i = 0; i < l; ++i) {
             builder->addComparator(i, i + gap);
         }
     }
 }
 
-void generate_bitonic(Builder *builder, int n) {
-    const int l = ceil_pow_2(n), nfull = 1 << l, res = (nfull - n) >> 1, nres = n + res;
+// the merge process is still bottom-up
+void BitonicMerger::merge(int left_begin, int left_len, int right_begin, int right_len) {
+    const int l = ceil_log_2(left_len), half_pow2 = 1 << l;
+    const int left_i = half_pow2 - left_len, right_i = half_pow2 + right_len;
+    const int offset = left_begin - left_i, right_end = right_begin + right_len;
     // truncate from both sides
 
+    int length_1 = half_pow2 << 1;
+    for(int i = length_1 - right_i; i < half_pow2; ++i){ // length_1 - 1 - i < right_i
+        this->builder->addComparator(offset + i, offset + length_1 - 1 - i);
+    }
+    this->builder->addSynchronizer(left_begin, right_end);
+    for(int d_2 = l - 1; d_2 >= 0; --d_2) {
+        const int gap = 1 << d_2, step = gap << 1;
+        const int mask = ~(step - 1);
+        for(int j = offset; j < gap + offset; ++j) {
+            int i = j + ((left_begin - 1 - j + step) & mask);
+            for(; i < right_end - gap; i += step) {
+                this->builder->addComparator(i, i + gap);
+            }
+        }
+        this->builder->addSynchronizer(left_begin, right_end);
+    }
+}
+
+void generate_bitonic_bottom_up(Builder *builder, int n) {
+    const int l = ceil_log_2(n);
+
     for(int d_1 = 0; d_1 < l; ++d_1) {
-        const int length_1 = 1 << d_1;
+        const int length_1 = 1 << d_1, step = length_1 << 1;
         for(int j = 0; j < length_1; ++j) {
-            const int partner = length_1 * 2 - j - 1;
-            const int left = j - res, right = partner - res;
-            int i;
-            for(i = 0; i < - left; i += length_1 * 2);
-            for(; i < nres - partner; i += length_1 * 2) {
-                builder->addComparator(i + left, i + right);
+            const int partner = step - 1 - j;
+            for(int i = 0; i < n - partner; i += step) {
+                builder->addComparator(i + j, i + partner);
             }
         }
         builder->addSynchronizer(0, n);
         for(int d_2 = d_1 - 1; d_2 >= 0; --d_2) {
-            const int length_2 = 1 << d_2;
-            for(int j = 0; j < length_2; ++j) {
-                const int partner = j + length_2;
-                const int left = j - res, right = partner - res;
-                int i;
-                for(i = 0; i < - left; i += length_2 * 2);
-                for(; i < nres - partner; i += length_2 * 2) {
-                    builder->addComparator(i + left, i + right);
+            const int gap = 1 << d_2, step = gap << 1;
+            for(int j = 0; j < gap; ++j) {
+                for(int i = j; i < n - gap; i += step) {
+                    builder->addComparator(i, i + gap);
                 }
             }
             builder->addSynchronizer(0, n);
@@ -71,26 +123,48 @@ void generate_bitonic(Builder *builder, int n) {
     }
 }
 
-void generate_odd_even_merge(Builder *builder, int n) {
-    const int l = ceil_pow_2(n);
+// the merge process is still bottom-up
+void OddEvenMerger::merge(int left_begin, int left_len, int right_begin, int right_len) {
+    const int l = ceil_log_2(left_len), half_pow2 = 1 << l;
+    const int left_off = right_begin - half_pow2;
+    const int right_end = right_begin + right_len;
+    // truncate from both sides
+
+    for(int i = left_begin; i < right_end - half_pow2; ++i){
+        this->builder->addComparator(i, i + half_pow2);
+    }
+    this->builder->addSynchronizer(left_begin, right_end);
+    for(int d_2 = l - 1; d_2 >= 0; --d_2) {
+        const int gap = 1 << d_2, step = gap << 1;
+        for(int j = gap + left_off; j < step + left_off; ++j) {
+            int i;
+            for(i = j; i < left_begin; i += step);
+            for(; i < right_end - gap; i += step) {
+                this->builder->addComparator(i, i + gap);
+            }
+        }
+        this->builder->addSynchronizer(left_begin, right_end);
+    }
+}
+
+void generate_odd_even_merge_bottom_up(Builder *builder, int n) {
+    const int l = ceil_log_2(n);
 
     for(int d_1 = 0; d_1 < l; ++d_1) {
-        const int length_1 = 1 << d_1;
-        for(int j = 0; j < length_1; ++j) {
-            const int partner = j + length_1;
-            for(int i = 0; i < n - partner; i += length_1 * 2) {
-                builder->addComparator(i + j, i + partner);
+        const int gap_1 = 1 << d_1, step_1 = gap_1 << 1;
+        for(int j = 0; j < gap_1; ++j) {
+            for(int i = j; i < n - gap_1; i += step_1) {
+                builder->addComparator(i, i + gap_1);
             }
         }
         builder->addSynchronizer(0, n);
         for(int d_2 = d_1 - 1; d_2 >= 0; --d_2) {
-            const int length_2 = 1 << d_2;
-            for(int k = 0; k < length_2; ++k) {
-                const int partner = k + length_2;
-                for(int j = 0; j < n; j += length_1 * 2) {
-                    const int end = std::min(n, j + length_1 * 2);
-                    for(int i = j + length_2; i < end - partner; i += length_2 * 2) {
-                        builder->addComparator(i + k, i + partner);
+            const int gap_2 = 1 << d_2, step_2 = gap_2 << 1;
+            for(int k = 0; k < gap_2; ++k) {
+                for(int j = 0; j < n; j += step_1) {
+                    const int end = std::min(n, j + step_1);
+                    for(int i = j + k + gap_2; i < end - gap_2; i += step_2) {
+                        builder->addComparator(i, i + gap_2);
                     }
                 }
             }
@@ -100,7 +174,7 @@ void generate_odd_even_merge(Builder *builder, int n) {
 }
 
 void generate_merge_exchange(Builder *builder, int n) {
-    const int l = ceil_pow_2(n);
+    const int l = ceil_log_2(n);
 
     for(int p = 1 << (l - 1); p > 0; p >>= 1) {
         int q = 1 << (l - 1);
@@ -121,7 +195,7 @@ void generate_merge_exchange(Builder *builder, int n) {
 }
 
 void generate_pairwise(Builder *builder, int n) {
-    const int l = ceil_pow_2(n);
+    const int l = ceil_log_2(n);
 
     for(int d_1 = 0; d_1 < l; ++d_1) {
         const int length_1 = 1 << d_1;
@@ -150,49 +224,31 @@ void generate_pairwise(Builder *builder, int n) {
     }
 }
 
-
-namespace bose_nelson {
-    void merge(Builder *builder, \
-                        int i, int length_i, int j, int length_j) {
-        if(length_i == 1 && length_j == 1) {
-            builder->addComparator(i, j);
-        }
-        else if (length_i == 1 && length_j == 2) {
-            builder->addComparator(i, j + 1);
-            builder->addComparator(i, j);
-        }
-        else if (length_i == 2 && length_j == 1) {
-            builder->addComparator(i, j);
-            builder->addComparator(i + 1, j);
-        }
-        else {
-            const int i_mid = length_i >> 1;
-            const int j_mid = (length_i & 1) ? (length_j >> 1): ((length_j + 1) >> 1);
-            merge(builder, i, i_mid, j, j_mid);
-            merge(builder, i + i_mid, length_i - i_mid, j + j_mid, length_j - j_mid);
-            merge(builder, i + i_mid, length_i - i_mid, j, j_mid);
-        }
+void BoseNelsonMerger::merge(int i, int length_i, int j, int length_j) {
+    if(length_i == 1 && length_j == 1) {
+        this->builder->addComparator(i, j);
     }
-
-    void split(Builder *builder, int i, int length) {
-        if(length >= 2) {
-            const int right = length >> 1;
-            const int left = length - right;
-            split(builder, i, left);
-            split(builder, i + left, right);
-            merge(builder, i, left, i + left, right);
-        }
+    else if (length_i == 1 && length_j == 2) {
+        this->builder->addComparator(i, j + 1);
+        this->builder->addComparator(i, j);
     }
-}
-
-void generate_bose_nelson(Builder *builder, int n) {
-    bose_nelson::split(builder, 0, n);
+    else if (length_i == 2 && length_j == 1) {
+        this->builder->addComparator(i, j);
+        this->builder->addComparator(i + 1, j);
+    }
+    else {
+        const int i_mid = length_i >> 1;
+        const int j_mid = (length_i & 1) ? (length_j >> 1): ((length_j + 1) >> 1);
+        this->merge(i, i_mid, j, j_mid);
+        this->merge(i + i_mid, length_i - i_mid, j + j_mid, length_j - j_mid);
+        this->merge(i + i_mid, length_i - i_mid, j, j_mid);
+    }
 }
 
 void generate_hibbard(Builder *builder, int n) {
-    int x = 0, y = 1, lastbit = 1 << ceil_pow_2(n - 1);
-start:
+    int x = 0, y = 1, lastbit = highest_bit(n);
     for(;;) {
+start:
         int bit = 1;
         int xbit = x & bit;
         int ybit = y & bit;
@@ -225,6 +281,7 @@ start:
             bit <<= 1;
             if(y & bit) {
                 x &= ~bit;
+                builder->addSynchronizer(x, std::min(n, 2 * y - x));
                 goto start;
             }
             x |= bit;
@@ -307,8 +364,6 @@ namespace optimal16 {
     }
 }
 
-template<typename T, int N>
-inline constexpr int array_size(T (&)[N]) { return N; }
 
 void generate_optimal_size(Builder *builder, int n) {
     switch (n) {
@@ -337,7 +392,7 @@ void generate_optimal_size(Builder *builder, int n) {
         build_given(builder, n, array_size(optimal16::comp_s), optimal16::comp_s);
         break;
     default:
-        generate_odd_even_merge(builder, n);
+        generate_odd_even_merge_bottom_up(builder, n);
         break;
     }
 }
@@ -365,34 +420,36 @@ void generate_optimal_latency(Builder *builder, int n) {
         build_given(builder, n, array_size(optimal16::comp_l), optimal16::comp_l);
         break;
     default:
-        generate_odd_even_merge(builder, n);
+        generate_odd_even_merge_bottom_up(builder, n);
         break;
     }
 }
 
-typedef void (*Generator)(Builder *builder, int n);
-
-static const Generator generators[] = {
+static const SorterGenerator generators[] = {
     generate_bubble,
     generate_odd_even_transposition,
     generate_3smooth_comb,
-    generate_bitonic,
-    generate_odd_even_merge,
+    generate_mergesort_top_down<BitonicMerger>,
+    generate_bitonic_bottom_up,
+    generate_mergesort_top_down<OddEvenMerger>,
+    generate_odd_even_merge_bottom_up,
     generate_merge_exchange,
     generate_pairwise,
-    generate_bose_nelson,
+    generate_mergesort_top_down<BoseNelsonMerger>,
     generate_hibbard,
     generate_optimal_size,
-    generate_optimal_latency,
+    generate_optimal_latency
 };
 
 void generate_network(int index, int n, Builder *builder) {
-    generators[index](builder, n);
+    if(n > 1) {
+        generators[index](builder, n);
+    }
 }
 
 // we only know optimal networks for 0 ~ 16
 int maximum_n(int index) {
-    return (index >= 9) ? 16 : SORTING_NETWORK_MAX_INPUT;
+    return (index >= (array_size(generators) - 2)) ? 16 : SORTING_NETWORK_MAX_INPUT;
 }
 
 }

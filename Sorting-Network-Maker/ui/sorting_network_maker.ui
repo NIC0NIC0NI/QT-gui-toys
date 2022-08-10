@@ -24,7 +24,7 @@
     <normaloff>:/icon/icon.png</normaloff>:/icon/icon.png</iconset>
   </property>
   <property name="locale">
-   <locale language="English" country="AnyCountry"/>
+   <locale language="English" country="UnitedStates"/>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -58,6 +58,9 @@
             <height>0</height>
            </size>
           </property>
+          <property name="maxVisibleItems">
+           <number>20</number>
+          </property>
           <item>
            <property name="text">
             <string>Bubble sort</string>
@@ -75,12 +78,22 @@
           </item>
           <item>
            <property name="text">
-            <string>Bitonic sort</string>
+            <string>Bitonic merge sort (top-down)</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Odd-even merge sort</string>
+            <string>Bitonic merge sort (bottom-up)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Odd-even merge sort (top-down)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Odd-even merge sort (bottom-up)</string>
            </property>
           </item>
           <item>
@@ -90,7 +103,7 @@
           </item>
           <item>
            <property name="text">
-            <string>Pairwise merge sort</string>
+            <string>Pairwise sort</string>
            </property>
           </item>
           <item>
@@ -160,11 +173,11 @@
           <height>0</height>
          </size>
         </property>
-        <property name="text">
-         <string>generate</string>
-        </property>
         <property name="whatsThis">
          <string>Generate the picture representing the sorting network. (Shortcut: Enter)</string>
+        </property>
+        <property name="text">
+         <string>generate</string>
         </property>
        </widget>
       </item>
@@ -179,11 +192,11 @@
           <height>0</height>
          </size>
         </property>
-        <property name="text">
-         <string>save</string>
-        </property>
         <property name="whatsThis">
          <string>Save the generated picture. (Shortcut: Ctrl+S)</string>
+        </property>
+        <property name="text">
+         <string>save</string>
         </property>
        </widget>
       </item>
@@ -422,7 +435,7 @@
     <string>Split Parallel Levels</string>
    </property>
    <property name="whatsThis">
-    <string>When the option "Split Parallel Levels" is enabled, the comparators will be sorted by their parallel latency. Also, comparators different latency cannot be drawn in the same column.</string>
+    <string>When the option &quot;Split Parallel Levels&quot; is enabled, the comparators will be sorted by their parallel latency. Also, comparators different latency cannot be drawn in the same column.</string>
    </property>
   </action>
   <action name="actionCompact">
@@ -430,13 +443,13 @@
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Compact Layout</string>
    </property>
    <property name="whatsThis">
-    <string>When the option "Compact Layout" is enabled, the comparators may be reordered to make the layout more compact.</string>
+    <string>When the option &quot;Compact Layout&quot; is enabled, the comparators may be reordered to make the layout more compact.</string>
    </property>
   </action>
   <action name="actionKeepAspectRatio">
@@ -477,7 +490,7 @@
     <string>Reproducible Randomness</string>
    </property>
    <property name="whatsThis">
-    <string>When the option "Reproducible Randomness" is enabled, the generated test example will be the same in each repeated generation.</string>
+    <string>When the option &quot;Reproducible Randomness&quot; is enabled, the generated test example will be the same in each repeated generation.</string>
    </property>
   </action>
   <action name="actionExampleFont">

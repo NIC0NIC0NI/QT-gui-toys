@@ -3,19 +3,23 @@
 #include <QCommandLineOption>
 #include <QStringList>
 #include <QTranslator>
+#include "common.h"
 #include "pinyin_bianjiqi.h"
 
 int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
     QTranslator translator;
-    QStringList translationFileName = {"l", "language"};
-    QStringList inputFileName = {"o", "open"};
+    
+    QStringList translationFileName = {QSTR("l"), QSTR("language")};
+    QStringList inputFileName = {QSTR("o"), QSTR("open")};
     QCommandLineParser parser;
-    QCommandLineOption translationFileOpt(translationFileName, "Load the translation file to translate the UI.", "translation");
-    QCommandLineOption inputFileOpt(inputFileName, "The program starts with the initial input file opened.", "input");
+    QCommandLineOption translationFileOpt(translationFileName, 
+        QSTR("Load the translation file to translate the UI."), QSTR("translation"));
+    QCommandLineOption inputFileOpt(inputFileName, 
+        QSTR("The program starts with the initial input file opened."), QSTR("input"));
 
-    QCoreApplication::setApplicationName("Pinyin-Bianjiqi");
+    QCoreApplication::setApplicationName(QSTR("Pinyin-Bianjiqi"));
     parser.addOption(translationFileOpt);
     parser.addOption(inputFileOpt);
     parser.process(a);

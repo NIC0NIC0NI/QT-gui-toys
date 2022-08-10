@@ -2,9 +2,13 @@
 #define COMMON_H_INCLUDED 1
 
 #include <cstddef>
+#include <QtGlobal>
 #include <QTextDocument>
 
-typedef std::size_t size_t;
+using std::size_t;
+
+#define QSTR(str)  QStringLiteral(str)
+#define CSTR(str)  QLatin1String(str)
 
 void convertPinyin(QTextDocument * doc);
 

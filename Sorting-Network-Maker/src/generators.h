@@ -1,29 +1,13 @@
 #ifndef GENERATORS_H_INCLUDED
 #define GENERATORS_H_INCLUDED 1
 
-#include <cstddef>
-#include <cstring>
-#include <type_traits>
-#include <QScopedArrayPointer>
 #include <QVector>
 #include <QString>
 #include <QColor>
 #include <QPicture>
-
-#define SORTING_NETWORK_MAX_INPUT 128
+#include "common.h"
 
 namespace sorting_network {
-    typedef std::integral_constant<int, 0> zero_type;
-    template<typename T>
-    class ScopedArray : public QScopedArrayPointer<T> {
-    public:
-        void setZero(std::size_t n) { std::memset(this->data(), 0, sizeof(T) * n); }
-        ScopedArray(std::size_t n) : QScopedArrayPointer<T>(new T[n]) {}
-        ScopedArray(std::size_t n, std::integral_constant<T, 0>) : ScopedArray(n) { setZero(n); }
-        using QScopedArrayPointer<T>::data;
-        using QScopedArrayPointer<T>::operator[];
-    };
-
     struct Comparator {
         int where, low, high;
         Comparator(){}
@@ -41,7 +25,7 @@ namespace sorting_network {
         int getLayoutWidth() const { return column_m; }
     protected:
         QVector<Comparator> comparators;
-        ScopedArray<int> latency;
+        IntegralArray<int> latency;
         int ops, input_n, column_m;
         int preprocessLayout(bool split_levels, bool compact);
     };
@@ -61,7 +45,7 @@ namespace sorting_network {
         QString showInputAt(int i) const { return showData(input[i], this->low_bits); }
         QString showOutputAt(int i) const { return showData(output[i], this->low_bits); }
     private:
-        QScopedArrayPointer<TestData> input, output;
+        IntegralArray<TestData> input, output;
         int input_n;
         TestData low_bits;
         static QString showData(TestData value, TestData low_bits_);
@@ -93,12 +77,6 @@ namespace sorting_network {
 
     QPixmap picture_to_pixmap(const QPicture& picture);
     bool show_picture(const QPicture& picture, QPaintDevice* device);
-
-    inline int ceil_pow_2(int x) {
-        int i;
-        for(i = 0; (1 << i) < x; ++i);
-        return i;
-    }
 }
 
 

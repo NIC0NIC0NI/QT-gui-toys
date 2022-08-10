@@ -15,9 +15,10 @@ HEADERS  += src/common.h \
      src/pinyin_bianjiqi.h
 
 FORMS    += ui/pinyin_bianjiqi.ui
-s
+
 RESOURCES += rsrc/pinyin_bianjiqi.qrc
 
 TRANSLATIONS += lang/cn.ts
 
+# QMAKE_CXXFLAGS += -DQT_NO_CAST_FROM_ASCII
 # RC_FILE = rsrc/icon.rc

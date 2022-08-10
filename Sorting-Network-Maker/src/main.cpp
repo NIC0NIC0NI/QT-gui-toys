@@ -3,17 +3,19 @@
 #include <QCommandLineOption>
 #include <QStringList>
 #include <QTranslator>
+#include "common.h"
 #include "sorting_network_maker.h"
 
 int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
     QTranslator translator;
-    QStringList translationFileName = {"l", "language"};
+    QStringList translationFileName = {QSTR("l"), QSTR("language")};
     QCommandLineParser parser;
-    QCommandLineOption translationFileOpt(translationFileName, "Load the translation file to translate the UI.", "translation");
+    QCommandLineOption translationFileOpt(translationFileName, 
+        QSTR("Load the translation file to translate the UI."), QSTR("translation"));
 
-    QCoreApplication::setApplicationName("Sorting Network Maker");
+    QCoreApplication::setApplicationName(QSTR("Sorting Network Maker"));
     parser.addOption(translationFileOpt);
     parser.process(a);
     QString translationFileValue = parser.value(translationFileOpt);
