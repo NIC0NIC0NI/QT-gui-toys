@@ -19,17 +19,18 @@ public:
 public slots:
     void save();
     void generate();
-    void about();
-    void selectLineColor();
-    void selectBackgroundColor();
-    void selectBackgroundTransparency();
-    void selectResolution();
-    void selectExampleFont();
-    void selectStabilityTestType();
-    void adjustInputRange(int index);
     void previousAlgorithm();
     void nextAlgorithm();
-    void whatsThis();
+    
+    // automatic connected by QMetaObject::connectSlotsByName
+    void on_actionLineColor_triggered();
+    void on_actionBackgroundColor_triggered();
+    void on_actionBackgroundTransparency_triggered();
+    void on_actionResolution_triggered();
+    void on_actionAbout_triggered();
+    void on_actionExampleFont_triggered();
+    void on_actionTestStability_triggered();
+    void on_selectAlgorithm_currentIndexChanged(int index);
 
 private:
     Ui::SortingNetworkMakerClass ui;

@@ -15,28 +15,16 @@ PinyinBianjiqi::PinyinBianjiqi(const QString& startFileName, QWidget *parent)
     this->updateTimer.setInterval(UPDATE_DELAY);
 
     connect(this->ui.actionQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-    connect(this->ui.actionFont, SIGNAL(triggered()), this, SLOT(selectFont()));
-    connect(this->ui.actionColor, SIGNAL(triggered()), this, SLOT(selectColor()));
-    connect(this->ui.actionAbout, SIGNAL(triggered()), this, SLOT(about()));
-    connect(this->ui.actionNew, SIGNAL(triggered()), this, SLOT(newFile()));
-    connect(this->ui.actionOpen, SIGNAL(triggered()), this, SLOT(openFile()));
     connect(this->ui.actionSave, SIGNAL(triggered()), this, SLOT(saveFile()));
     connect(this->ui.actionSaveAs, SIGNAL(triggered()), this, SLOT(saveAsFile()));
-    connect(this->ui.actionSaveOutput, SIGNAL(triggered()), this, SLOT(saveOutput()));
-    connect(this->ui.actionDelete, SIGNAL(triggered()), this, SLOT(deleteSelectedText()));
-    connect(this->ui.textEdit, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
     connect(&this->updateTimer, SIGNAL(timeout()), this, SLOT(updateText()));
 
     if(!startFileName.isEmpty()) {
-        if (this->openFileByName(startFileName)) {
-            this->currentFileName = startFileName;
-        } else {
-            this->errorMessage(tr("Cannot open file \"%1\"").arg(startFileName));
-        }
+        this->openAsCurrentFile(startFileName);
     }
 }
 
-void PinyinBianjiqi::onTextChanged() {
+void PinyinBianjiqi::on_textEdit_textChanged() {
     this->updateTimer.start();
 }
 
@@ -46,11 +34,11 @@ void PinyinBianjiqi::updateText() {
     this->ui.textShow->setDocument(doc);
 }
 
-void PinyinBianjiqi::deleteSelectedText() {
+void PinyinBianjiqi::on_actionDelete_triggered() {
     this->ui.textEdit->textCursor().removeSelectedText();
 }
 
-void PinyinBianjiqi::newFile() {
+void PinyinBianjiqi::on_actionNew_triggered() {
     if (this->askSaveOrContinue()) {
         this->currentFileName.clear();
         this->ui.textEdit->clear();
@@ -64,32 +52,41 @@ QString PinyinBianjiqi::fileFormat() {
     return format;
 }
 
-void PinyinBianjiqi::openFile() {
+void PinyinBianjiqi::on_actionOpen_triggered() {
     if (this->askSaveOrContinue()) {
         auto filename = QFileDialog::getOpenFileName(
             this, tr("Select an input file to open"), 
             QSTR("."), fileFormat()
         );
         if (!filename.isNull()) {
-            if (this->openFileByName(filename)) {
-                this->currentFileName.swap(filename);
-            } else {
-                this->errorMessage(tr("Cannot open file \"%1\"").arg(filename));
-            }
+            this->openAsCurrentFile(filename);
         }
     }
 }
 
-bool PinyinBianjiqi::openFileByName(const QString& filename) {
-    QFile reader(filename, this); 
-    reader.open(QIODevice::ReadOnly | QIODevice::Text);
-    if (reader.isReadable()) {
-        auto text = QString::fromUtf8(reader.readAll());
-        reader.close();
-        this->ui.textEdit->setHtml(text);
-        return true;
+void PinyinBianjiqi::openAsCurrentFile(const QString& filename) {
+    QFile file(filename, this); 
+    if(file.exists()) {
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text) && file.isReadable()) {
+            auto text = QString::fromUtf8(file.readAll());
+            file.close();
+            this->ui.textEdit->setHtml(text);
+            this->currentFileName = filename;
+        }
+        this->errorMessage(tr("Cannot open file \"%1\".").arg(filename));
+    } else {
+        if (QMessageBox::question(
+                this, 
+                tr("File \"%1\" not exist.").arg(filename), 
+                tr("Create new?"),
+                QMessageBox::Ok | QMessageBox::Cancel
+            ) == QMessageBox::Ok) {
+            if(file.open(QIODevice::NewOnly | QIODevice::Text) && file.isWritable()) {
+                this->currentFileName = filename;
+            }
+            this->errorMessage(tr("Cannot create file \"%1\".").arg(filename));
+        }
     }
-    return false;
 }
 
 void PinyinBianjiqi::saveFile() {
@@ -103,7 +100,7 @@ void PinyinBianjiqi::saveFile() {
         if (status == Success) {
             this->ui.textEdit->document()->setModified(false);
         } else if (status == Failure) {
-            this->errorMessage(tr("Failed to save input file \"%1\"").arg(this->currentFileName));
+            this->errorMessage(tr("Failed to save input file \"%1\".").arg(this->currentFileName));
         }
     }
 }
@@ -121,12 +118,12 @@ void PinyinBianjiqi::saveAsFile() {
             this->ui.textEdit->document()->setModified(false);
             this->currentFileName.swap(filename);
         } else if (status == Failure) {
-            this->errorMessage(tr("Failed to save input as file \"%1\"").arg(filename));
+            this->errorMessage(tr("Failed to save input as file \"%1\".").arg(filename));
         }
     }
 }
 
-void PinyinBianjiqi::saveOutput() {
+void PinyinBianjiqi::on_actionSaveOutput_triggered() {
     auto filename = QFileDialog::getSaveFileName(
         this, 
         tr("Save pīnyīn as file"), 
@@ -135,7 +132,7 @@ void PinyinBianjiqi::saveOutput() {
     );
     if (!filename.isNull()) {
         if (this->saveTextEditToFile(*this->ui.textShow, filename) == Failure) {
-            this->errorMessage(tr("Failed to save pīnyīn as \"%1\"").arg(filename));
+            this->errorMessage(tr("Failed to save pīnyīn as \"%1\".").arg(filename));
         }
     }
 }
@@ -207,7 +204,7 @@ void PinyinBianjiqi::closeEvent(QCloseEvent *event) {
     }
 }
 
-void PinyinBianjiqi::selectFont() {
+void PinyinBianjiqi::on_actionFont_triggered() {
     bool ok;
     auto textEdit = this->ui.textEdit;
     auto font = QFontDialog::getFont(&ok, textEdit->currentFont(), this, tr("Select font"));
@@ -224,7 +221,7 @@ void PinyinBianjiqi::selectFont() {
     }
 }
 
-void PinyinBianjiqi::selectColor() {
+void PinyinBianjiqi::on_actionColor_triggered() {
     auto textEdit = this->ui.textEdit;
     auto color = QColorDialog::getColor(textEdit->textColor(), this, tr("Select color"));
     if (color.isValid()) {
@@ -245,7 +242,7 @@ void PinyinBianjiqi::errorMessage(const QString &msg){
     QMessageBox::warning(this, tr("Error"), msg);
 }
 
-void PinyinBianjiqi::about() {
+void PinyinBianjiqi::on_actionAbout_triggered() {
     QLatin1String p("<p>"), q("</p>");
     QLatin1String ref_author("<a href='https://github.com/NIC0NIC0NI'>NIC0NIC0NI</a>");
     QLatin1String ref_license("<a href='http://doc.qt.io/qt-5/lgpl.html'>GNU LGPL version 3</a>");

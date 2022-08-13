@@ -99,28 +99,29 @@ void counting_sort(QVector<T>& vec, int max_value, Key key) { // stable
 }
 
 void Layout::addComparator(int r1, int r2) {
-    auto new_latency = std::max(this->latency[r1], this->latency[r2]) + 1;
-    this->latency[r1] = this->latency[r2] = new_latency;
-    this->comparators.push_back(Comparator(new_latency, r1, r2));
+    this->comparators.push_back(Comparator(r1, r2));
     this->ops += 1;
 }
 
 void Layout::addSynchronizer(int i, int j) {
-    auto i1 = this->latency.data() + i, i2 = this->latency.data() + j;
-    update_as_max(i1, i2);
+    this->synchronizers.push_back(Comparator(i, j, static_cast<int>(this->comparators.size())));
 }
 
-inline int layout_comparator(int r1, int r2, int* latency, int* position) {
+inline int update_latency(int r1, int r2, int* latency) {
     auto new_latency = std::max(latency[r1], latency[r2]) + 1;
     latency[r1] = latency[r2] = new_latency;
+    return new_latency;
+}
+
+inline int layout_comparator_loose(int r1, int r2, int* position) {
     return update_as_max(position + r1, position + (r2 + 1), 1);
 }
 
-int layout_comparator_compact(int n, int r1, int r2, int* position, bool* occupied) {
+int layout_comparator_compact(int r1, int r2, int* position, bool* occupied, int ld) {
     int pos = std::max(position[r1], position[r2]);
     for(int col = pos; ; ++col) {
-        auto i1 = occupied + col * n + r1;
-        auto i2 = occupied + col * n + (r2 + 1);
+        auto i1 = occupied + col * ld + r1;
+        auto i2 = occupied + col * ld + (r2 + 1);
 
         if(std::none_of(i1, i2, [](bool p) { return p; })) {
             std::fill(i1, i2, true);
@@ -130,58 +131,73 @@ int layout_comparator_compact(int n, int r1, int r2, int* position, bool* occupi
     }
 }
 
-int Layout::preprocessLayout(bool split_levels, bool compact) {
-    const auto n = this->input_n;
-    IntegralArray<int> position(n, zero_type());
-    const auto lb = this->latency.data(), le = lb + n;
-    const auto pb = position.data(), pe = pb + n;
-    int last_latency = 0;
-
-    if(split_levels) {
-        counting_sort(this->comparators,
-            max_value(lb, le), [](const Comparator& c) { return c.where; }
-        );
+inline int split_levels(bool split_parallel, int last_latency, int this_latency, int *tb, int *te) {
+    if(split_parallel && last_latency != this_latency) {
+        update_as_max(tb, te);
     }
-    // recompute latency without synchronizers
-    this->latency.fill(n, zero_type());
-    for(auto& c : this->comparators) {
-        if(split_levels && last_latency != c.where) {
-            last_latency = c.where;
-            update_as_max(pb, pe);
-        }
-        auto pos = layout_comparator(c.low, c.high, lb, pb);
-        if(!compact) {
-            c.where = pos;
-        }
-    }
-    return max_value(pb, pe);
+    return this_latency;
 }
 
+void Layout::layout(Options options) {
+    const int n = this->input_n, nsync = this->synchronizers.size();
+    IntegralArray<int> temp(n, zero_type());
+    const auto tb = temp.data(), te = tb + n;
+    int last_latency = 0, counting_max;
+    bool split_parallel = options.testFlag(SplitParallel);
 
-void Layout::layout(bool split_levels, bool compact) {
-    auto n = this->input_n;
-    IntegralArray<int> position(n, zero_type());
-    const auto pb = position.data(), pe = pb + n;
-    auto column_m_loose = this->preprocessLayout(split_levels, compact);
-    if(compact) {  // recompute a compact layout
-        IntegralArray<bool> occupied(n * column_m_loose, false_type());
-        const auto o = occupied.data();
-        int last_latency = 0;
-        for(auto& c : this->comparators) {
-            if(split_levels && last_latency != c.where) {
-                last_latency = c.where;
-                update_as_max(pb, pe);
+    // reorder comparators if split parallel levels
+    if( options.testFlag(SplitRecursive) && split_parallel && nsync > 0 ) {
+        IntegralArray<int> temp2(n, zero_type());
+        const auto tb2 = temp.data(), te2 = tb2 + n;
+        auto comp = this->comparators.begin();
+        int ib = 0, ie;
+        this->addSynchronizer(0, n);
+        for(int j = 0; j <= nsync; ++j, ib = ie) {
+            const auto& sync = this->synchronizers.at(j);
+            ie = sync.where;
+            for(int i = ib; i < ie; ++i) {
+                comp[i].where = update_latency(comp[i].low, comp[i].high, tb);
+                update_latency(comp[i].low, comp[i].high, tb2);
             }
-            c.where = layout_comparator_compact(n, c.low, c.high, pb, o);
+            update_as_max(tb + sync.low, tb + sync.high);
         }
-        column_m = max_value(pb, pe);
+        counting_max = max_value(tb, te);
+        this->latency = max_value(tb2, te2);
     } else {
-        column_m = column_m_loose;
+        for(auto& c : this->comparators) {
+            c.where = update_latency(c.low, c.high, tb);
+        }
+        this->latency = counting_max = max_value(tb, te);
     }
-}
+    temp.fill(n, zero_type());
+    if(split_parallel) {
+        counting_sort(this->comparators, counting_max, [](const Comparator& c) { return c.where; });
+    }
+    
+    // compute layout
+    if(options.testFlag(Compact)) {
+        for(auto& c : static_cast<const QVector<Comparator>&>(this->comparators)) {
+            last_latency = split_levels(split_parallel, last_latency, c.where, tb, te);
+            layout_comparator_loose(c.low, c.high, tb);
+        }
 
-int Layout::getLatency() const {
-    return max_value(this->latency.data(), this->latency.data() + this->input_n);
+        // recompute compact layout
+        IntegralArray<bool> occupied(n * max_value(tb, te), false_type());
+        const auto o = occupied.data();
+
+        temp.fill(n, zero_type());
+        last_latency = 0;
+        for(auto& c : this->comparators) {
+            last_latency = split_levels(split_parallel, last_latency, c.where, tb, te);
+            c.where = layout_comparator_compact(c.low, c.high, tb, o, n);
+        }
+    } else {
+        for(auto& c : this->comparators) {
+            last_latency = split_levels(split_parallel, last_latency, c.where, tb, te);
+            c.where = layout_comparator_loose(c.low, c.high, tb);
+        }
+    }
+    this->column_m = max_value(tb, te);
 }
 
 }

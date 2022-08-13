@@ -4,118 +4,132 @@
 <context>
     <name>PinyinBianjiqi</name>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="34"/>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="77"/>
-        <source>Cannot open file &quot;%1&quot;</source>
-        <translation>无法打开文件 “%1”</translation>
-    </message>
-    <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="62"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="50"/>
         <source>HTML</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="63"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="51"/>
         <source>Text file</source>
         <translation>文本文件</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="70"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="58"/>
         <source>Select an input file to open</source>
         <translation>选择文件</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="106"/>
-        <source>Failed to save input file &quot;%1&quot;</source>
-        <translation>保存输入文件“%1”时出错</translation>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="76"/>
+        <source>Cannot open file &quot;%1&quot;.</source>
+        <translation>无法打开文件“%1”。</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="114"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="81"/>
+        <source>Create new?</source>
+        <translation>新建？</translation>
+    </message>
+    <message>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="111"/>
         <source>Save input as file</source>
         <translation>将输入保存到文件</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="115"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="112"/>
         <source>untitled input.html</source>
         <translation>未命名输入.html</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="124"/>
-        <source>Failed to save input as file &quot;%1&quot;</source>
-        <translation>保存输入到文件“%1”时出错</translation>
-    </message>
-    <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="132"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="129"/>
         <source>Save pīnyīn as file</source>
         <translation>保存拼音</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="133"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="130"/>
         <source>untitled pīnyīn.html</source>
         <translation>未命名拼音.html</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="138"/>
-        <source>Failed to save pīnyīn as &quot;%1&quot;</source>
-        <translation>保存拼音到文件“%1”时出错</translation>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="80"/>
+        <source>File &quot;%1&quot; not exist.</source>
+        <translation>文件“%1”不存在。</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="153"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="87"/>
+        <source>Cannot create file &quot;%1&quot;.</source>
+        <translation>无法创建文件“%1”。</translation>
+    </message>
+    <message>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="103"/>
+        <source>Failed to save input file &quot;%1&quot;.</source>
+        <translation>保存输入文件“%1”时出错。</translation>
+    </message>
+    <message>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="121"/>
+        <source>Failed to save input as file &quot;%1&quot;.</source>
+        <translation>保存输入到文件“%1”时出错。</translation>
+    </message>
+    <message>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="135"/>
+        <source>Failed to save pīnyīn as &quot;%1&quot;.</source>
+        <translation>保存拼音到文件“%1”时出错。</translation>
+    </message>
+    <message>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="150"/>
         <source>Save as text file</source>
         <translation>保存为文本文件</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="154"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="151"/>
         <source>Text format will be discarded in text file, continue to save?</source>
         <translation>纯文本文件将丢弃文本格式，继续？</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="181"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="178"/>
         <source>Quit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="182"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="179"/>
         <source>Save the current input file?</source>
         <translation>保存当前输入？</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="213"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="210"/>
         <source>Select font</source>
         <translation>选择字体</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="229"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="226"/>
         <source>Select color</source>
         <translation>选择颜色</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="245"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="242"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="254"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="251"/>
         <source>This is an opensource software.</source>
         <translation>这是开源软件。</translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="255"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="252"/>
         <source>Author: </source>
         <translation>作者： </translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="256"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="253"/>
         <source>License: </source>
         <translation>许可证： </translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="257"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="254"/>
         <source>View source code: </source>
         <translation>查看源代码： </translation>
     </message>
     <message>
-        <location filename="../src/pinyin_bianjiqi.cpp" line="258"/>
+        <location filename="../src/pinyin_bianjiqi.cpp" line="255"/>
         <source>About Pīnyīn Biānjíqì</source>
         <translation>关于拼音编辑器</translation>
     </message>

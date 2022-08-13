@@ -149,6 +149,9 @@
             <height>0</height>
            </size>
           </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
           <property name="maximum">
            <number>128</number>
           </property>
@@ -329,6 +332,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionGenerate"/>
     <addaction name="actionSave"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -351,20 +355,37 @@
       <string>Test Example</string>
      </property>
      <addaction name="actionShowTestExample"/>
+     <addaction name="actionExampleFont"/>
+     <addaction name="separator"/>
      <addaction name="actionTestReproducible"/>
      <addaction name="actionTestStability"/>
-     <addaction name="actionExampleFont"/>
     </widget>
-    <addaction name="actionLineColor"/>
-    <addaction name="actionBackgroundColor"/>
-    <addaction name="actionBackgroundTransparency"/>
-    <addaction name="separator"/>
-    <addaction name="actionResolution"/>
-    <addaction name="actionKeepAspectRatio"/>
-    <addaction name="separator"/>
-    <addaction name="actionSplitLevels"/>
-    <addaction name="actionCompact"/>
-    <addaction name="separator"/>
+    <widget class="QMenu" name="menuColor">
+     <property name="title">
+      <string>Color</string>
+     </property>
+     <addaction name="actionLineColor"/>
+     <addaction name="actionBackgroundColor"/>
+     <addaction name="actionBackgroundTransparency"/>
+    </widget>
+    <widget class="QMenu" name="menuLayout">
+     <property name="title">
+      <string>Layout</string>
+     </property>
+     <addaction name="actionSplitParallel"/>
+     <addaction name="actionSplitRecursive"/>
+     <addaction name="actionCompact"/>
+    </widget>
+    <widget class="QMenu" name="menuResolution">
+     <property name="title">
+      <string>Resolution</string>
+     </property>
+     <addaction name="actionResolution"/>
+     <addaction name="actionKeepAspectRatio"/>
+    </widget>
+    <addaction name="menuColor"/>
+    <addaction name="menuResolution"/>
+    <addaction name="menuLayout"/>
     <addaction name="menuTestExample"/>
    </widget>
    <addaction name="menuFile"/>
@@ -424,34 +445,6 @@
     <string>Background Transparency</string>
    </property>
   </action>
-  <action name="actionSplitLevels">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Split Parallel Levels</string>
-   </property>
-   <property name="whatsThis">
-    <string>When the option &quot;Split Parallel Levels&quot; is enabled, the comparators will be sorted by their parallel latency. Also, comparators different latency cannot be drawn in the same column.</string>
-   </property>
-  </action>
-  <action name="actionCompact">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Compact Layout</string>
-   </property>
-   <property name="whatsThis">
-    <string>When the option &quot;Compact Layout&quot; is enabled, the comparators may be reordered to make the layout more compact.</string>
-   </property>
-  </action>
   <action name="actionKeepAspectRatio">
    <property name="checkable">
     <bool>true</bool>
@@ -465,7 +458,7 @@
   </action>
   <action name="actionResolution">
    <property name="text">
-    <string>Resolution</string>
+    <string>Set Resolution</string>
    </property>
   </action>
   <action name="actionShowTestExample">
@@ -514,6 +507,56 @@
     <string>F1</string>
    </property>
   </action>
+  <action name="actionCompact">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Compact Layout</string>
+   </property>
+   <property name="whatsThis">
+    <string>When the option &quot;Compact Layout&quot; is enabled, the comparators may be reordered to make the layout more compact.</string>
+   </property>
+  </action>
+  <action name="actionSplitRecursive">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Split Recursive Levels</string>
+   </property>
+   <property name="whatsThis">
+    <string>The option &quot;Split Recursive Levels&quot; is only effective when the option &quot;Split Parallel Levels&quot; is enabled. When the option &quot;Split Recursive Levels&quot; is enabled, the comparators in recursive algorithms cannot be reordered across recursive levels.</string>
+   </property>
+  </action>
+  <action name="actionSplitParallel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Split Parallel Levels</string>
+   </property>
+   <property name="whatsThis">
+    <string>When the option &quot;Split Parallel Levels&quot; is enabled, the comparators will be sorted by their parallel latency. Also, comparators different latency cannot be drawn in the same column.</string>
+   </property>
+  </action>
+  <action name="actionGenerate">
+   <property name="text">
+    <string>Generate</string>
+   </property>
+   <property name="shortcut">
+    <string>Enter</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
@@ -533,6 +576,38 @@
     <hint type="destinationlabel">
      <x>541</x>
      <y>422</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSplitParallel</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>actionSplitRecursive</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShowTestExample</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>actionExampleFont</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>

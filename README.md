@@ -1,6 +1,6 @@
 ﻿# QT-gui-toys
 
-Some toys with QT-based GUI.
+Some toys with GUI. Developed using QT5.
 
 ## Compile
 

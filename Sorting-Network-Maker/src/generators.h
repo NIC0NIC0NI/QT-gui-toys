@@ -5,29 +5,32 @@
 #include <QString>
 #include <QColor>
 #include <QPicture>
+#include <QFlags>
 #include "common.h"
 
 namespace sorting_network {
     struct Comparator {
         int where, low, high;
-        Comparator(){}
-        Comparator(int lv, int ll, int hh) : where(lv), low(ll), high(hh) {}
+        Comparator(int ll = 0, int hh = 0, int lv = 0) : where(lv), low(ll), high(hh) {}
     };
     
     class Layout {
     public:
-        Layout(int n) : latency(n, zero_type()), ops(0), input_n(n) {}
+        enum Option {
+            SplitParallel = 1, SplitRecursive = 2, Compact = 4
+        };
+        Q_DECLARE_FLAGS(Options, Option)
+
+        Layout(int n) : ops(0), input_n(n) {}
         void addComparator(int i, int j);
         void addSynchronizer(int i, int j);
-        void layout(bool split_levels, bool compact);
+        void layout(Options options);
         int getNumberOfComparator() const { return ops; }
-        int getLatency() const;
+        int getLatency() const { return latency; }
         int getLayoutWidth() const { return column_m; }
     protected:
-        QVector<Comparator> comparators;
-        IntegralArray<int> latency;
-        int ops, input_n, column_m;
-        int preprocessLayout(bool split_levels, bool compact);
+        QVector<Comparator> comparators, synchronizers;
+        int ops, input_n, column_m, latency;
     };
 
     class Painter : public Layout {
@@ -39,6 +42,7 @@ namespace sorting_network {
     class Tester {
     public:
         typedef int TestData;
+        
         Tester(int n, TestData equal_elements, bool reproducible);
         bool checkSorted() const;
         void compareAndSwap(int i, int j);

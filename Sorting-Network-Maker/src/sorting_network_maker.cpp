@@ -23,24 +23,19 @@ SortingNetworkMaker::SortingNetworkMaker(QWidget *parent) \
     generated(false), saved(false) {
     this->ui.setupUi(this);
     connect(this->ui.actionQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-    connect(this->ui.actionAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(this->ui.actionSave, SIGNAL(triggered()), this, SLOT(save()));
     connect(this->ui.buttonSave, SIGNAL(clicked()), this, SLOT(save()));
     connect(this->ui.buttonGenerate, SIGNAL(clicked()), this, SLOT(generate()));
-    connect(this->ui.actionLineColor, SIGNAL(triggered()), this, SLOT(selectLineColor()));
-    connect(this->ui.actionBackgroundColor, SIGNAL(triggered()), this, SLOT(selectBackgroundColor()));
-    connect(this->ui.actionBackgroundTransparency, SIGNAL(triggered()), this, SLOT(selectBackgroundTransparency()));
-    connect(this->ui.actionResolution, SIGNAL(triggered()), this, SLOT(selectResolution()));
-    connect(this->ui.actionExampleFont, SIGNAL(triggered()), this, SLOT(selectExampleFont()));
-    connect(this->ui.actionTestStability, SIGNAL(triggered()), this, SLOT(selectStabilityTestType()));
-    connect(this->ui.selectAlgorithm, SIGNAL(currentIndexChanged(int)), this, SLOT(adjustInputRange(int)));
-    connect(this->ui.actionWhatsThis, SIGNAL(triggered()), this, SLOT(whatsThis()));
+    connect(this->ui.actionGenerate, SIGNAL(triggered()), this, SLOT(generate()));
+
+#ifndef QT_NO_WHATSTHIS
+    // QWhatsThis::enterWhatsThisMode is not a slot
+    connect(this->ui.actionWhatsThis, &QAction::triggered, &QWhatsThis::enterWhatsThisMode);
+#endif
 
 #ifndef QT_NO_SHORTCUT
-    // QPushButton "generate" can only set one shortcut
     // For keyboards with numpad, 'Enter' and 'Return' are different keys
     new QShortcut(QKeySequence(Qt::Key_Return), this, SLOT(generate()));
-    new QShortcut(QKeySequence(Qt::Key_Enter), this, SLOT(generate()));
     new QShortcut(QKeySequence(Qt::Key_Up), this->ui.selectSize, SLOT(stepUp()));
     new QShortcut(QKeySequence(Qt::Key_Down), this->ui.selectSize, SLOT(stepDown()));
     new QShortcut(QKeySequence(Qt::Key_PageUp), this, SLOT(previousAlgorithm()));
@@ -79,14 +74,14 @@ void SortingNetworkMaker::save() {
     }
 }
 
-void SortingNetworkMaker::selectLineColor() {
+void SortingNetworkMaker::on_actionLineColor_triggered() {
     auto color = QColorDialog::getColor(this->lines, this, tr("Select line color"));
     if (color.isValid()) {
         this->lines = color;
     }
 }
 
-void SortingNetworkMaker::selectBackgroundColor() {
+void SortingNetworkMaker::on_actionBackgroundColor_triggered() {
     auto color = QColorDialog::getColor(this->background, this, tr("Select background color"));
     if (color.isValid()) {
         int alpha = this->background.alpha();
@@ -95,7 +90,7 @@ void SortingNetworkMaker::selectBackgroundColor() {
     }
 }
 
-void SortingNetworkMaker::selectBackgroundTransparency() {
+void SortingNetworkMaker::on_actionBackgroundTransparency_triggered() {
     bool ok;
     auto alpha = QInputDialog::getInt(this, tr("Set transparency"), tr("alpha"), 
         this->background.alpha(), 0, 255, 1, &ok);
@@ -104,7 +99,7 @@ void SortingNetworkMaker::selectBackgroundTransparency() {
     }
 }
 
-void SortingNetworkMaker::selectResolution() {
+void SortingNetworkMaker::on_actionResolution_triggered() {
     bool ok;
     auto resolution = QInputDialog::getInt(this, tr("Set resolution"), tr("pixels"), 
         this->resolution, 2, 256, 1, &ok);
@@ -114,7 +109,7 @@ void SortingNetworkMaker::selectResolution() {
 }
 
 
-void SortingNetworkMaker::selectExampleFont() {
+void SortingNetworkMaker::on_actionExampleFont_triggered() {
     bool ok;
     auto font = QFontDialog::getFont(&ok, this->exampleFont, this);
     if (ok) {
@@ -122,7 +117,7 @@ void SortingNetworkMaker::selectExampleFont() {
     }
 }
 
-void SortingNetworkMaker::selectStabilityTestType() {
+void SortingNetworkMaker::on_actionTestStability_triggered() {
     bool ok;
     auto eq = QInputDialog::getInt(this, tr("Test sorting stability"), tr("number of equal elements"), 
         this->equalElements, 1, 8, 1, &ok);
@@ -141,18 +136,20 @@ void SortingNetworkMaker::refresh() {
 }
 
 void SortingNetworkMaker::generate() {
-    auto n = this->ui.selectSize->value();
-    auto index = this->ui.selectAlgorithm->currentIndex();
-    auto split_levels = this->ui.actionSplitLevels->isChecked();
-    auto compact = this->ui.actionCompact->isChecked();
-    auto reproducible = this->ui.actionTestReproducible->isChecked();
-    auto showExample = this->ui.actionShowTestExample->isChecked();
     auto w = this->resolution;
     auto h = this->resolution;
-    int equal = this->equalElements;
+    auto equal = this->equalElements;
+    auto n = this->ui.selectSize->value();
+    auto index = this->ui.selectAlgorithm->currentIndex();
+    auto reproducible = this->ui.actionTestReproducible->isChecked();
+    auto showExample = this->ui.actionShowTestExample->isChecked();
+    Layout::Options flags;
+    flags.setFlag(Layout::SplitParallel,  this->ui.actionSplitParallel->isChecked());
+    flags.setFlag(Layout::SplitRecursive, this->ui.actionSplitRecursive->isChecked());
+    flags.setFlag(Layout::Compact,        this->ui.actionCompact->isChecked());
     TestedPainter builder(n, equal, reproducible);
     algorithm::generate_network(index, n, &builder);
-    builder.layout(split_levels, compact);
+    builder.layout(flags);
     this->ui.opValueLabel->setNum(builder.getNumberOfComparator());
     this->ui.latencyValueLabel->setNum(builder.getLatency());
     this->ui.actionSave->setEnabled(true);
@@ -206,15 +203,11 @@ void SortingNetworkMaker::closeEvent(QCloseEvent *event) {
     }
 }
 
-void SortingNetworkMaker::adjustInputRange(int index) {
+void SortingNetworkMaker::on_selectAlgorithm_currentIndexChanged(int index) {
     auto m = algorithm::maximum_n(index);
     if(m != this->ui.selectSize->maximum()) {
         this->ui.selectSize->setMaximum(m);
     }
-}
-
-void SortingNetworkMaker::whatsThis() {
-    QWhatsThis::enterWhatsThisMode();
 }
 
 void SortingNetworkMaker::previousAlgorithm() {
@@ -235,7 +228,7 @@ void SortingNetworkMaker::errorMessage(const QString &msg){
     QMessageBox::warning(this, tr("Error"), msg);
 }
 
-void SortingNetworkMaker::about() {
+void SortingNetworkMaker::on_actionAbout_triggered() {
     QLatin1String p("<p>"), q("</p>");
     QLatin1String ref_author("<a href='https://github.com/NIC0NIC0NI'>NIC0NIC0NI</a>");
     QLatin1String ref_license("<a href='http://doc.qt.io/qt-5/lgpl.html'>GNU LGPL version 3</a>");
