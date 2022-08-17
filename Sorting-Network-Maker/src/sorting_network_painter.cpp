@@ -1,6 +1,6 @@
-#include <cmath>
-#include <QPainter>
+#include <QRectF>
 #include <QPainterPath>
+#include <QPainter>
 #include "generators.h"
 
 namespace sorting_network {

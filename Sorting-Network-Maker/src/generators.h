@@ -5,6 +5,7 @@
 #include <QString>
 #include <QColor>
 #include <QPicture>
+#include <QPixmap>
 #include <QFlags>
 #include "common.h"
 

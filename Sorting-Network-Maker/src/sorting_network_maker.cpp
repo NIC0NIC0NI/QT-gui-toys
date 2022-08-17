@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <QSize>
 #include <QString>
 #include <QStringView>

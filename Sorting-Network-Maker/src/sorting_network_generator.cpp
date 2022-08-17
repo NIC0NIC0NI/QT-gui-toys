@@ -1,4 +1,3 @@
-#include <iterator>
 #include "generators.h"
 
 namespace sorting_network {

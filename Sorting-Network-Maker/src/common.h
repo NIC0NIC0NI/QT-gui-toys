@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <type_traits>
+#include <iterator>
 #include <QtGlobal>
 #include <QtAlgorithms>
 #include <QScopedArrayPointer>
@@ -17,6 +18,11 @@
 typedef std::integral_constant<int, 0> zero_type;
 using std::false_type;
 using std::size_t;
+
+template<typename Iterator>
+using itv_t = typename std::iterator_traits<Iterator>::value_type;
+template<typename Iterator>
+using itd_t = typename std::iterator_traits<Iterator>::difference_type;
 
 template<typename T, int N>
 inline constexpr int array_size(T (&)[N]) { return N; }

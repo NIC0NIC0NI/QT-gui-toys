@@ -1,8 +1,8 @@
 #include <limits>
-#include <iterator>
 #include <algorithm>
 #include <numeric>
 #include <functional>
+#include <QChar>
 #include <QRandomGenerator>
 #include "generators.h"
 
@@ -48,7 +48,7 @@ void Tester::compareAndSwap(int r1, int r2) {
     }
 }
 
-static const char equal_element_names[] = "ABCDEFGH"; 
+static const QChar equal_element_names[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
 
 QString Tester::showData(TestData value, TestData low_bits) {
     TestData ih = value >> low_bits;
@@ -60,33 +60,33 @@ QString Tester::showData(TestData value, TestData low_bits) {
 }
 
 // different from std::max_element, this function handles empty input
-template<typename Iterator>
-typename std::iterator_traits<Iterator>::value_type 
-max_value(Iterator begin, Iterator end) {
-    typedef typename std::iterator_traits<Iterator>::value_type Value;
-    return std::accumulate(begin, end, 0, 
-        [](const Value& x, const Value& y) { return std::max(x, y); }
+template<typename Iter>
+itv_t<Iter> max_value(Iter begin, Iter end) {
+    return std::accumulate(begin, end, static_cast<itv_t<Iter>>(0), 
+        [](itv_t<Iter> x, itv_t<Iter> y) { return std::max(x, y); }
     );
 }
 
-template<typename Iterator>
-typename std::iterator_traits<Iterator>::value_type
-update_as_max(Iterator begin, Iterator end, \
-    typename std::iterator_traits<Iterator>::value_type step = 0) {
-    typename std::iterator_traits<Iterator>::value_type 
-        new_value = max_value(begin, end);
+template<typename Iter>
+itv_t<Iter> update_as_max(Iter begin, Iter end, itv_t<Iter> step = 0) {
+    auto new_value = max_value(begin, end);
     std::fill(begin, end, new_value + step);
     return new_value;
 }
 
+template<typename Iter>
+inline itv_t<Iter> update_as_max(Iter it, itd_t<Iter> i, itd_t<Iter> j, itv_t<Iter> step = 0) {
+    return update_as_max(it + i, it + j, step);
+}
+
 template<typename T, typename Key>
-void counting_sort(QVector<T>& vec, int max_value, Key key) { // stable
-    IntegralArray<int> counter(max_value + 1, zero_type());
+void counting_sort(QVector<T>& vec, int max_val, Key key) { // stable
+    IntegralArray<int> counter(max_val + 1, zero_type());
     QVector<T> cpy(vec.size());
     for(auto& c : vec) {
         ++ counter[key(c)];
     }
-    for(int prefix = 0, i = 0; i <= max_value; ++i) {
+    for(int prefix = 0, i = 0; i <= max_val; ++i) {
         int temp = counter[i];
         counter[i] = prefix;
         prefix += temp;
@@ -114,12 +114,12 @@ inline int update_latency(int r1, int r2, int* latency) {
 }
 
 inline int layout_comparator_loose(int r1, int r2, int* position) {
-    return update_as_max(position + r1, position + (r2 + 1), 1);
+    return update_as_max(position, r1, r2 + 1, 1);
 }
 
 int layout_comparator_compact(int r1, int r2, int* position, bool* occupied, int ld) {
     int pos = std::max(position[r1], position[r2]);
-    for(int col = pos; ; ++col) {
+    for(int col = pos; ; ++col) { // search from the left to find a compact layout
         auto i1 = occupied + col * ld + r1;
         auto i2 = occupied + col * ld + (r2 + 1);
 
@@ -148,7 +148,7 @@ void Layout::layout(Options options) {
     // reorder comparators if split parallel levels
     if( options.testFlag(SplitRecursive) && split_parallel && nsync > 0 ) {
         IntegralArray<int> temp2(n, zero_type());
-        const auto tb2 = temp.data(), te2 = tb2 + n;
+        const auto real_latency = temp2.data();
         auto comp = this->comparators.begin();
         int ib = 0, ie;
         this->addSynchronizer(0, n);
@@ -156,13 +156,13 @@ void Layout::layout(Options options) {
             const auto& sync = this->synchronizers.at(j);
             ie = sync.where;
             for(int i = ib; i < ie; ++i) {
+                update_latency(comp[i].low, comp[i].high, real_latency);
                 comp[i].where = update_latency(comp[i].low, comp[i].high, tb);
-                update_latency(comp[i].low, comp[i].high, tb2);
             }
-            update_as_max(tb + sync.low, tb + sync.high);
+            update_as_max(tb, sync.low, sync.high);
         }
         counting_max = max_value(tb, te);
-        this->latency = max_value(tb2, te2);
+        this->latency = max_value(real_latency, real_latency + n);
     } else {
         for(auto& c : this->comparators) {
             c.where = update_latency(c.low, c.high, tb);
